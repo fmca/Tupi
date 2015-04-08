@@ -22,7 +22,110 @@
       <h1>
 <a id="tupi" class="anchor" href="#tupi" aria-hidden="true"><span class="octicon octicon-link"></span></a>Tupi</h1>
 
-<p>A language and compiler support to describe, expand and execute extended finite-state machines</p>
+<p>A language and interpreter support to describe, expand and execute extended finite-state machines (EFSM).</p>
+
+<h3>
+<a id="language" class="anchor" href="#language" aria-hidden="true"><span class="octicon octicon-link"></span></a>Language</h3>
+
+<p>The main goal is to mimic every EFSM property in <strong>code</strong>:</p>
+
+<ul>
+<li>Memory</li>
+<li>States</li>
+<li>Transitions</li>
+<li>Events</li>
+<li>Guards</li>
+<li>Actions</li>
+</ul>
+
+<p>Plus additional concepts and features such as <strong>polymorphism</strong> and <strong>pattern matching</strong>. <br>
+<strong>You can learn more in our <a href="https://github.com/fmca/Tupi/wiki">Wiki</a></strong></p>
+
+<h3>
+<a id="interpreter" class="anchor" href="#interpreter" aria-hidden="true"><span class="octicon octicon-link"></span></a>Interpreter</h3>
+
+<p>The interpreter is written in Java, so it will run in most platforms, even web pages.<br>Besides its main functionality, you can also enable the generation of <code>dot</code> files to illustrate any EFSM.</p>
+
+<h3>
+<a id="input-and-output" class="anchor" href="#input-and-output" aria-hidden="true"><span class="octicon octicon-link"></span></a>Input and Output</h3>
+
+<p>User input and console output are natively implemented as EFSMs. (I bet you started noticing that everything will be described using state-machines... everything!)</p>
+
+<h3>
+<a id="code-example" class="anchor" href="#code-example" aria-hidden="true"><span class="octicon octicon-link"></span></a>Code Example</h3>
+
+<p>Every event is described by a <code>{EVENT}</code> tag followed by one or more <em>transition pattern matches</em> <code>[states_origin] -&gt; newState</code>, a transition <code>guard</code> and an <code>action</code> to be executed. </p>
+
+<pre><code>machine Stack
+
+    memory
+        list, peek
+
+    states
+        empty, notempty
+
+    events
+        {START}
+            [*] -&gt; empty
+                initialize
+
+        {PUSH} [x]
+            [*empty] -&gt; notempty    | pushAllowed
+                addElement x
+
+        {POP}
+            [notempty] -&gt; empty     | !hasMore1Element
+                deleteElement
+            [notempty] -&gt; notempty  | hasMore1Element
+                deleteElement
+    guards
+        hasMore1Element = list.size &gt; 1
+        pushAllowed = true
+
+    actions
+        initialize
+            list = start List
+
+        addElement [x]
+            list {add} x
+            peek = list.last
+
+        deleteElement
+            list {delete} list.size-1
+            peek = list.last
+
+
+</code></pre>
+
+<p>You can also extend an existent machine:</p>
+
+<pre><code>machine SizeLimitedStack extends Stack
+
+    memory
+        limit
+
+    states
+        full
+
+    events
+        {PUSH} [x]
+            [*empty] -&gt; full | !pushAllowed
+                addElement x
+
+        {POP}
+            [full] -&gt; empty | !hasMore1Element
+                deleteElement
+            [full] -&gt; notempty
+                deleteElement
+
+    guards
+        pushAllowed = list.size &lt; limit
+
+    actions
+        initialize [x]
+            Stack.initialize
+            limit = x
+</code></pre>
 
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/fmca/Tupi">Tupi</a> is maintained by <a href="https://github.com/fmca">fmca</a>.</span>
