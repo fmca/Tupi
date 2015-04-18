@@ -1,5 +1,5 @@
 # Tupi
-A language and interpreter support to describe, expand and execute extended finite-state machines (EFSM).
+Language and interpreter support to describe, expand and execute extended finite-state machines (EFSM).
 
 ###Language
 The main goal is to mimic every EFSM property in **code**:
