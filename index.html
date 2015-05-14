@@ -1,25 +1,42 @@
-<!DOCTYPE html>
-<html lang="en-us">
-  <head>
-    <meta charset="UTF-8">
-    <title>Tupi by fmca</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
-  </head>
-  <body>
-    <section class="page-header">
-      <h1 class="project-name">Tupi</h1>
-      <h2 class="project-tagline">Language and compiler support to describe, expand and execute extended finite-state machines</h2>
-      <a href="https://github.com/fmca/Tupi" class="btn">View on GitHub</a>
-      <a href="https://github.com/fmca/Tupi/zipball/master" class="btn">Download .zip</a>
-      <a href="https://github.com/fmca/Tupi/tarball/master" class="btn">Download .tar.gz</a>
-    </section>
+<!doctype html>
+<!-- The Time Machine GitHub pages theme was designed and developed by Jon Rohan, on Feb 7, 2012. -->
+<!-- Follow him for fun. http://twitter.com/jonrohan. Tail his code on https://github.com/jonrohan -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-    <section class="main-content">
-      <h1>
+  <link rel="stylesheet" href="stylesheets/stylesheet.css" media="screen">
+  <link rel="stylesheet" href="stylesheets/github-dark.css">
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script type="text/javascript" src="javascripts/script.js"></script>
+
+  <title>Tupi</title>
+  <meta name="description" content="Language and compiler support to describe, expand and execute extended finite-state machines">
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+</head>
+
+<body>
+
+  <div class="wrapper">
+    <header>
+      <h1 class="title">Tupi</h1>
+    </header>
+    <div id="container">
+      <p class="tagline">Language and compiler support to describe, expand and execute extended finite-state machines</p>
+      <div id="main" role="main">
+        <div class="download-bar">
+        <div class="inner">
+          <a href="https://github.com/fmca/Tupi/tarball/master" class="download-button tar"><span>Download</span></a>
+          <a href="https://github.com/fmca/Tupi/zipball/master" class="download-button zip"><span>Download</span></a>
+          <a href="https://github.com/fmca/Tupi" class="code">View Tupi on GitHub</a>
+        </div>
+        <span class="blc"></span><span class="trc"></span>
+        </div>
+        <article class="markdown-body">
+          <h1>
 <a id="tupi" class="anchor" href="#tupi" aria-hidden="true"><span class="octicon octicon-link"></span></a>Tupi</h1>
 
 <p>Language and interpreter support to describe, expand and execute extended finite-state machines (EFSM).</p>
@@ -54,45 +71,50 @@
 <h3>
 <a id="code-example" class="anchor" href="#code-example" aria-hidden="true"><span class="octicon octicon-link"></span></a>Code Example</h3>
 
-<p>Every event is described by a <code>{EVENT}</code> tag followed by one or more <em>transition pattern matches</em> <code>[states_origin] -&gt; newState</code>, a transition <code>guard</code> and an <code>action</code> to be executed. </p>
+<p>Every event is described by a <code>{EVENT}</code> tag followed by one or more <em>transition pattern matches</em> <code>[states_origin] -&gt; newState</code>, a transition <code>guard</code> and an <code>action</code> to be executed.</p>
 
-<pre><code>machine Stack
+<pre><code>use tupi.list as List
+
+machine Stack
 
     memory
-        list, peek
+        List list
 
     states
         empty, notempty
 
-    events
-        {START}
-            [*] -&gt; empty
-                initialize
-
-        {PUSH} [x]
-            [*empty] -&gt; notempty    | pushAllowed
-                addElement x
-
-        {POP}
-            [notempty] -&gt; empty     | !hasMore1Element
-                deleteElement
-            [notempty] -&gt; notempty  | hasMore1Element
-                deleteElement
     guards
-        hasMore1Element = list.size &gt; 1
-        pushAllowed = true
-
+        init = true,
+        hasMore1Element = list.size &gt; 1,
+        pushAllowed = true,
+       hasNoMore1Element = !hasMore1Element
     actions
         initialize
-            list = start List
+            trigger {START} on list
 
-        addElement [x]
-            list {add} x
+        addElement [int x]
+            trigger {add} on list with [x]
             peek = list.last
 
         deleteElement
-            list {delete} list.size-1
+            trigger {delete} on list
             peek = list.last
+
+    events
+            {START}
+                [*] -&gt; empty                          | init
+                    initialize [limit]
+
+            {PUSH} [int x]
+                [*empty] -&gt; notempty           | pushAllowed
+                    addElement [x]
+
+            {POP}
+                [notempty] -&gt; empty            | hasNoMore1Element
+                    deleteElement
+
+                [notempty] -&gt; notempty       | hasMore1Element
+                    deleteElement
 
 
 </code></pre>
@@ -100,42 +122,51 @@
 <p>You can also extend an existent machine:</p>
 
 <pre><code>machine SizeLimitedStack extends Stack
-
     memory
-        limit
+        int limit
 
     states
         full
 
+    guards
+        pushAllowed = list.size &lt; limit,
+        newpush = !pushAllowed
+    actions
+        initialize [int x]
+            super.initialize
+            limit = x
+
     events
-        {PUSH} [x]
-            [*empty] -&gt; full | !pushAllowed
-                addElement x
+        {PUSH} [int x]
+            [*] -&gt; full                  | newpush
+                addElement [x]
 
         {POP}
-            [full] -&gt; empty | !hasMore1Element
+            [full] -&gt; empty          | hasNoMore1Element
                 deleteElement
-            [full] -&gt; notempty
+            [full] -&gt; notempty     | hasMore1Element
                 deleteElement
-
-    guards
-        pushAllowed = list.size &lt; limit
-
-    actions
-        initialize [x]
-            Stack.initialize
-            limit = x
 </code></pre>
+        </article>
+      </div>
+    </div>
+    <footer>
+      <div class="owner">
+      <p><a href="https://github.com/fmca" class="avatar"><img src="https://avatars1.githubusercontent.com/u/2878250?v=3&amp;s=60" width="48" height="48"></a> <a href="https://github.com/fmca">fmca</a> maintains <a href="https://github.com/fmca/Tupi">Tupi</a></p>
 
-      <footer class="site-footer">
-        <span class="site-footer-owner"><a href="https://github.com/fmca/Tupi">Tupi</a> is maintained by <a href="https://github.com/fmca">fmca</a>.</span>
 
-        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
-      </footer>
-
-    </section>
+      </div>
+      <div class="creds">
+        <small>This page generated using <a href="https://pages.github.com/">GitHub Pages</a><br>theme by <a href="https://twitter.com/jonrohan/">Jon Rohan</a></small>
+      </div>
+    </footer>
+  </div>
+  <div class="current-section">
+    <a href="#top">Scroll to top</a>
+    <a href="https://github.com/fmca/Tupi/tarball/master" class="tar">tar</a><a href="https://github.com/fmca/Tupi/zipball/master" class="zip">zip</a><a href="" class="code">source code</a>
+    <p class="name"></p>
+  </div>
 
   
-  </body>
+</body>
 </html>
-
