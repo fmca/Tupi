@@ -23,76 +23,80 @@ User input and console output are natively implemented as EFSMs. (I bet you star
 
 ###Code Example
 
-Every event is described by a ```{EVENT}``` tag followed by one or more *transition pattern matches* ```[states_origin] -> newState```, a transition ```guard``` and an ```action``` to be executed. 
+Every event is described by a ```{EVENT}``` tag followed by one or more *transition pattern matches* ```[states_origin] -> newState```, a transition ```guard``` and an ```action``` to be executed.
 ```
+use tupi.list as List
+
 machine Stack
 
-	memory
-		list, peek
+    memory
+        List list
 
-	states
-		empty, notempty
-	
+    states
+        empty, notempty
+
+    guards
+        init = true,
+        hasMore1Element = list.size > 1,
+        pushAllowed = true,
+       hasNoMore1Element = !hasMore1Element
+    actions
+        initialize
+            trigger {START} on list
+
+        addElement [int x]
+            trigger {add} on list with [x]
+            peek = list.last
+
+        deleteElement
+            trigger {delete} on list
+            peek = list.last
+
 	events
-		{START}
-		    [*] -> empty
-			    initialize
-	
-		{PUSH} [x]
-			[*empty] -> notempty	| pushAllowed
-				addElement x
-			
-		{POP}
-			[notempty] -> empty		| !hasMore1Element
-				deleteElement
-			[notempty] -> notempty	| hasMore1Element
-				deleteElement
-	guards
-		hasMore1Element = list.size > 1
-		pushAllowed = true
-		
-	actions
-		initialize
-			list = start List
-			
-		addElement [x]
-			list {add} x
-			peek = list.last
-			
-		deleteElement
-			list {delete} list.size-1
-			peek = list.last
-	
-	
+	        {START}
+	            [*] -> empty                          | init
+	                initialize [limit]
+
+	        {PUSH} [int x]
+	            [*empty] -> notempty           | pushAllowed
+	                addElement [x]
+
+	        {POP}
+	            [notempty] -> empty            | hasNoMore1Element
+	                deleteElement
+
+	            [notempty] -> notempty       | hasMore1Element
+	                deleteElement
+
+
 ```
 
 You can also extend an existent machine:
 
 ```
 machine SizeLimitedStack extends Stack
-	
-	memory
-		limit
-		
-	states
-		full
-			
-	events
-		{PUSH} [x]
-			[*empty] -> full | !pushAllowed
-				addElement x
-				
-		{POP}
-			[full] -> empty | !hasMore1Element
-				deleteElement
-			[full] -> notempty
-				deleteElement
-	
-	guards
-		pushAllowed = list.size < limit
-		
-	actions
-		initialize [x]
-			Stack.initialize
-			limit = x
+    memory
+        int limit
+
+    states
+        full
+
+    guards
+        pushAllowed = list.size < limit,
+        newpush = !pushAllowed
+    actions
+        initialize [int x]
+            super.initialize
+            limit = x
+
+    events
+        {PUSH} [int x]
+            [*] -> full                  | newpush
+                addElement [x]
+
+        {POP}
+            [full] -> empty          | hasNoMore1Element
+                deleteElement
+            [full] -> notempty     | hasMore1Element
+                deleteElement
 ```
