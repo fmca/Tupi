@@ -59,32 +59,82 @@ class TupiJvmModelInferrer extends AbstractModelInferrer {
 		// Here you explain how your model is mapped to Java elements, by writing the actual translation code.
 		val className = machine.eResource.URI.fileExtension;
 		acceptor.accept(machine.toClass(namespaceStr + "." + className), [
-
-			val decl = machine.body.statesDecl
-			for (state : decl.states) {
-				members += decl.toField(state.name, typeRef(String));
-			}
+			
+			val statesDecl = machine.body.statesDecl;
+			members += machine.toEnumerationType("_State")[
+				for(state : statesDecl.states){
+					members+=machine.toEnumerationLiteral(state.name);
+				}
+			]
+				
+			members += machine.toField("_currentState", typeRef("_State"))
+			members += machine.toMethod("_match", typeRef(boolean)) [
+				parameters += machine.toParameter("statesToMatch", typeRef(String).addArrayTypeDimension)
+				varArgs = true
+				body = '''
+					boolean matched = false;
+					if(statesToMatch!=null){
+						for(String s : statesToMatch){
+						matched = matched || java.util.regex.Pattern.matches(s, _currentState.name());
+						}
+					}
+					return matched;
+				'''
+			]
 
 			val memoryDecl = machine.body.memoriesDecl;
 			for (memory : memoryDecl.memories) {
 				if (memory.type.typeMachine != null) {
-					members+=memoryDecl.toField(memory.name, typeRef(mapImports.get(memory.type.typeMachine.name).toString))
+					members +=
+						memoryDecl.toField(memory.name, typeRef(mapImports.get(memory.type.typeMachine.name).toString))
 				} else if (memory.type.typePrimitive != null) {
-					members+=memoryDecl.toField(memory.name, typeRef(memory.type.typePrimitive))
+					members += memoryDecl.toField(memory.name, typeRef(memory.type.typePrimitive))
 				}
 
+			}
+			
+			val guardsDecl = machine.body.guardsDecl;
+			for(guard : guardsDecl.guards){
+				members+= guardsDecl.toMethod("guard_"+ guard.name, typeRef(boolean))[
+					body = '''return «guard.expression»;'''
+				]
+			}
+
+			val eventsDecl = machine.body.eventsDecl;
+			for (event : eventsDecl.events) {
+				members += eventsDecl.toMethod(event.name, typeRef(void)) [
+					val variables = event?.parameters?.variablesDecl;
+					if (variables != null) {
+						for (param : variables) {
+							parameters += param.toParameter(param.name, typeRef(String));
+						}
+					}
+					body = '''
+											
+						«FOR transition : event.transitions»
+							if(_match(«transition.originStates»){
+								if(guard_«transition.guard.name»()){
+									action_«transition.action.name»();
+									_currentState=_State.«transition.destState.name»;
+									return;
+								}
+							}
+						«ENDFOR»
+					'''
+				]
 			}
 
 			val actionsDecl = machine.body.actionsDecl;
 			for (action : actionsDecl.actions) {
-				members += actionsDecl.toMethod(action.name, typeRef(void)) [
+				members += actionsDecl.toMethod("action_" + action.name, typeRef(void)) [
 					val variables = action?.variableListDecl?.variablesDecl
 
+					body = '''''';
 					if (variables != null) {
 						for (param : variables) {
 							parameters += param.toParameter(param.name, typeRef(String))
 						}
-						body = '''''';
+
 					}
 
 				]
@@ -100,10 +150,8 @@ class TupiJvmModelInferrer extends AbstractModelInferrer {
 
 	def dispatch void infer(UseDecl use, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
 		mapImports.put(use.type.name, use.importedNamespace);
-		
-		super.infer(use, acceptor, isPreIndexingPhase);
 
-		
+		super.infer(use, acceptor, isPreIndexingPhase);
 
 	}
 }
