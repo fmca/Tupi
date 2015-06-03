@@ -1,0 +1,149 @@
+grammar br.ufpe.cin.Tupi with org.eclipse.xtext.xbase.Xbase
+
+generate tupi "http://www.ufpe.br/cin/Tupi"
+
+Model:
+	namespace=NameSpace use+=UseDecl* machines+=MachineDecl*;
+
+NameSpace:
+	"namespace" name=QualifiedName
+;
+
+UseDecl:
+	"use" importedNamespace=QualifiedName "as" type=TypeMachine;
+
+MachineDecl:
+	'machine' name=TypeMachine ("extends" superMachine=([TypeMachine]))? body=MachineBody;
+
+MachineBody:
+	{MachineBody} memoriesDecl=MemoryDecl? statesDecl=StateDecl?  guardsDecl=GuardsDecl? actionsDecl=ActionsDecl? eventsDecl=EventsDecl?
+	;
+
+EventsDecl:
+	{EventsDecl} "events" events+=Event*;
+
+Event:
+	"{" name=ID "}" (parameters=VariableListDecl)? transitions+=Transition* ;
+
+Transition:
+	{Transition} "[" originStates+=STATEPATTERNDECL? ("," originStates+=STATEPATTERNDECL)* "]" "->" destState=[State] "|"  guard=[Guard]
+	action=[Action] ("("parameters+=Expression ("," parameters+=Expression)* ")")?;
+
+ActionsDecl:
+	{ActionsDecl} "actions" actions+=Action*;
+
+Action:
+	name=ID (variableListDecl=VariableListDecl)? commands+=Command*;
+
+Command:
+	TriggerEvent | Attribution | ExternalReference;
+
+ExternalReference:
+	machine=[Memory] (DOT attr+=Variable)+ var=VariableList?
+	| super="super" (DOT attr+=Variable)+ var=VariableList?
+;
+
+TriggerEvent:
+	"trigger" event=[Event] (parameters+=Expression ("," parameters+=Expression)*)? ("on" machine=[Memory])?;
+
+GuardsDecl:
+	{GuardsDecl} "guards" guards+=Guard ("," guards+=Guard)*;
+
+Guard:
+	name=ID "=" expression=Expression;
+	
+
+Expression:
+	 expr=ExpressionBinary | expr=ExprUnary;
+	 
+ExpressionBinary:
+	expr=ExprBinaryWithoutParentesis | "(" Expression ")" 
+;
+Value:
+	{Value} int=INT | str=STRING | bool=BOOLEAN | var=Variable | machAttr=ExternalReference;
+
+
+	//Comparators -> Weak precedence
+ExprBinaryWithoutParentesis:
+	left=ExprBinaryAddSub (op+=BINARYOPCOMP right+=ExprBinaryAddSub)*;
+
+	//Add and Sub -> Middle precedence
+ExprBinaryAddSub:
+	left=ExprBinaryMultDiv (op+=BINARYOPADDSUB right+=ExprBinaryMultDiv)*;
+
+	//Mult, Div -> High precedence 
+ExprBinaryMultDiv:
+	left=Value (op+=BINARYOPMULTDIV right+=Value)*;
+
+terminal BINARYOPCOMP:
+	"==" | ">" | "<" | "<=" | ">=";
+
+terminal BINARYOPADDSUB:
+	"+" | "-";
+
+terminal BINARYOPMULTDIV:
+	"*" | "/" | "%";
+
+ExprUnary:
+	UNARYOP Expression;
+
+terminal UNARYOP:
+	"-" | "!";
+
+MemoryDecl:
+	{MemoryDecl} "memory" (memories+=Memory ("," memories+=Memory)*)?;
+
+Attribution:
+	left=[Memory] "=" right=AttributionRight;
+	
+AttributionRight:
+	Expression
+;
+
+/*MachineAttributeUse:
+	machine=[Memory] (DOT attr+=Variable)+;*/
+
+terminal DOT:
+	"."
+;
+
+Memory:
+	type=Type name=ID;
+
+
+Type:
+	typeMachine=[TypeMachine] | typePrimitive=TYPEPRIMITIVE
+;
+
+TYPEPRIMITIVE:
+	"int" | "boolean" | "String"
+;
+TypeMachine:
+	name=ID
+;
+
+StateDecl:
+	{StateDecl} "states" states+=State ("," states+=State)*;
+
+State:
+	name=ID;
+	
+STATEPATTERNDECL:
+	("*"? ID "*"?) | "*"
+;
+
+VariableListDecl:
+"(" variablesDecl+=VariableDecl ("," variablesDecl+=VariableDecl)* ")";
+
+VariableList:
+	{VariableList} "(" variables+=Variable ("," variables+=Variable)* ")";
+
+Variable:
+	name=ID;
+	
+VariableDecl:
+	type=Type name=ID
+;
+
+terminal BOOLEAN:
+	'true' | 'false';

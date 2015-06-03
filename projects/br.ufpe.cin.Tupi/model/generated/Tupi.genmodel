@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<genmodel:GenModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="/br.ufpe.cin.Tupi/src-gen" editDirectory="/br.ufpe.cin.Tupi.edit/src"
+    editorDirectory="/br.ufpe.cin.Tupi.editor/src" modelPluginID="br.ufpe.cin.Tupi"
+    forceOverwrite="true" modelName="Tupi" updateClasspath="false" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container"
+    complianceLevel="6.0" copyrightFields="false" editPluginID="br.ufpe.cin.Tupi.edit"
+    editorPluginID="br.ufpe.cin.Tupi.editor" runtimeVersion="2.10">
+  <genPackages prefix="Tupi" basePackage="br.ufpe.cin" disposableProviderFactory="true"
+      fileExtensions="tupi" ecorePackage="Tupi.ecore#/">
+    <genClasses ecoreClass="Tupi.ecore#//Model">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//Model/namespace"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//Model/use"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//Model/machines"/>
+    </genClasses>
+    <genClasses ecoreClass="Tupi.ecore#//NameSpace">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Tupi.ecore#//NameSpace/name"/>
+    </genClasses>
+    <genClasses ecoreClass="Tupi.ecore#//UseDecl">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Tupi.ecore#//UseDecl/importedNamespace"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//UseDecl/type"/>
+    </genClasses>
+    <genClasses ecoreClass="Tupi.ecore#//MachineDecl">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//MachineDecl/name"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Tupi.ecore#//MachineDecl/superMachine"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//MachineDecl/body"/>
+    </genClasses>
+    <genClasses ecoreClass="Tupi.ecore#//MachineBody">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//MachineBody/memoriesDecl"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//MachineBody/statesDecl"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//MachineBody/guardsDecl"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//MachineBody/actionsDecl"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//MachineBody/eventsDecl"/>
+    </genClasses>
+    <genClasses ecoreClass="Tupi.ecore#//EventsDecl">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//EventsDecl/events"/>
+    </genClasses>
+    <genClasses ecoreClass="Tupi.ecore#//Event">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Tupi.ecore#//Event/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//Event/parameters"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//Event/transitions"/>
+    </genClasses>
+    <genClasses ecoreClass="Tupi.ecore#//Transition">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Tupi.ecore#//Transition/originStates"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Tupi.ecore#//Transition/destState"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Tupi.ecore#//Transition/guard"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Tupi.ecore#//Transition/action"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//Transition/parameters"/>
+    </genClasses>
+    <genClasses ecoreClass="Tupi.ecore#//ActionsDecl">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//ActionsDecl/actions"/>
+    </genClasses>
+    <genClasses ecoreClass="Tupi.ecore#//Action">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Tupi.ecore#//Action/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//Action/variableListDecl"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//Action/commands"/>
+    </genClasses>
+    <genClasses ecoreClass="Tupi.ecore#//Command"/>
+    <genClasses ecoreClass="Tupi.ecore#//ExternalReference">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Tupi.ecore#//ExternalReference/machine"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//ExternalReference/attr"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//ExternalReference/var"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Tupi.ecore#//ExternalReference/super"/>
+    </genClasses>
+    <genClasses ecoreClass="Tupi.ecore#//TriggerEvent">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Tupi.ecore#//TriggerEvent/event"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//TriggerEvent/parameters"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Tupi.ecore#//TriggerEvent/machine"/>
+    </genClasses>
+    <genClasses ecoreClass="Tupi.ecore#//GuardsDecl">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//GuardsDecl/guards"/>
+    </genClasses>
+    <genClasses ecoreClass="Tupi.ecore#//Guard">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Tupi.ecore#//Guard/name"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//Guard/expression"/>
+    </genClasses>
+    <genClasses ecoreClass="Tupi.ecore#//Expression"/>
+    <genClasses ecoreClass="Tupi.ecore#//ExpressionBinary">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//ExpressionBinary/expr"/>
+    </genClasses>
+    <genClasses ecoreClass="Tupi.ecore#//Value">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Tupi.ecore#//Value/int"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Tupi.ecore#//Value/str"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Tupi.ecore#//Value/bool"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//Value/var"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//Value/machAttr"/>
+    </genClasses>
+    <genClasses ecoreClass="Tupi.ecore#//ExprBinaryWithoutParentesis">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//ExprBinaryWithoutParentesis/left"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Tupi.ecore#//ExprBinaryWithoutParentesis/op"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//ExprBinaryWithoutParentesis/right"/>
+    </genClasses>
+    <genClasses ecoreClass="Tupi.ecore#//ExprBinaryAddSub">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//ExprBinaryAddSub/left"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Tupi.ecore#//ExprBinaryAddSub/op"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//ExprBinaryAddSub/right"/>
+    </genClasses>
+    <genClasses ecoreClass="Tupi.ecore#//ExprBinaryMultDiv">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//ExprBinaryMultDiv/left"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Tupi.ecore#//ExprBinaryMultDiv/op"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//ExprBinaryMultDiv/right"/>
+    </genClasses>
+    <genClasses ecoreClass="Tupi.ecore#//ExprUnary"/>
+    <genClasses ecoreClass="Tupi.ecore#//MemoryDecl">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//MemoryDecl/memories"/>
+    </genClasses>
+    <genClasses ecoreClass="Tupi.ecore#//Attribution">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Tupi.ecore#//Attribution/left"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//Attribution/right"/>
+    </genClasses>
+    <genClasses ecoreClass="Tupi.ecore#//AttributionRight"/>
+    <genClasses ecoreClass="Tupi.ecore#//Memory">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//Memory/type"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Tupi.ecore#//Memory/name"/>
+    </genClasses>
+    <genClasses ecoreClass="Tupi.ecore#//Type">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Tupi.ecore#//Type/typeMachine"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Tupi.ecore#//Type/typePrimitive"/>
+    </genClasses>
+    <genClasses ecoreClass="Tupi.ecore#//TypeMachine">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Tupi.ecore#//TypeMachine/name"/>
+    </genClasses>
+    <genClasses ecoreClass="Tupi.ecore#//StateDecl">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//StateDecl/states"/>
+    </genClasses>
+    <genClasses ecoreClass="Tupi.ecore#//State">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Tupi.ecore#//State/name"/>
+    </genClasses>
+    <genClasses ecoreClass="Tupi.ecore#//VariableListDecl">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//VariableListDecl/variablesDecl"/>
+    </genClasses>
+    <genClasses ecoreClass="Tupi.ecore#//VariableList">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//VariableList/variables"/>
+    </genClasses>
+    <genClasses ecoreClass="Tupi.ecore#//Variable">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Tupi.ecore#//Variable/name"/>
+    </genClasses>
+    <genClasses ecoreClass="Tupi.ecore#//VariableDecl">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//VariableDecl/type"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Tupi.ecore#//VariableDecl/name"/>
+    </genClasses>
+  </genPackages>
+</genmodel:GenModel>

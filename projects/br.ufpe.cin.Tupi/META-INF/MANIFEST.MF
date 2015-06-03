@@ -1,0 +1,32 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: br.ufpe.cin.Tupi
+Bundle-Vendor: My Company
+Bundle-Version: 1.0.0.qualifier
+Bundle-SymbolicName: br.ufpe.cin.Tupi; singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.xtext;visibility:=reexport,
+ org.eclipse.equinox.common;bundle-version="3.5.0",
+ org.eclipse.xtext.util,
+ org.eclipse.emf.ecore,
+ org.eclipse.emf.common,
+ org.eclipse.xtext.xbase.lib,
+ org.antlr.runtime,
+ org.eclipse.xtext.common.types,
+ org.objectweb.asm;bundle-version="[5.0.1,6.0.0)";resolution:=optional,
+ org.eclipse.xtext.xbase
+Import-Package: org.apache.log4j
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Export-Package: br.ufpe.cin,
+ br.ufpe.cin.services,
+ br.ufpe.cin.tupi,
+ br.ufpe.cin.tupi.impl,
+ br.ufpe.cin.tupi.util,
+ br.ufpe.cin.serializer,
+ br.ufpe.cin.parser.antlr,
+ br.ufpe.cin.parser.antlr.internal,
+ br.ufpe.cin.validation,
+ br.ufpe.cin.scoping,
+ br.ufpe.cin.generator,
+ br.ufpe.cin.formatting,
+ br.ufpe.cin.jvmmodel
