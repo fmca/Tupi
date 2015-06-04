@@ -1,18 +1,15 @@
 package br.ufpe.cin.jvmmodel
 
 import br.ufpe.cin.tupi.MachineDecl
+import br.ufpe.cin.tupi.NameSpace
+import br.ufpe.cin.tupi.UseDecl
 import com.google.inject.Inject
+import java.util.HashMap
 import org.eclipse.xtext.common.types.JvmDeclaredType
 import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
-import br.ufpe.cin.tupi.Model
-import java.util.HashMap
-import br.ufpe.cin.tupi.UseDecl
-import br.ufpe.cin.tupi.NameSpace
-import java.util.ArrayList
 import org.eclipse.emf.common.util.EList
-import br.ufpe.cin.tupi.TypeMachine
 
 /**
  * <p>Infers a JVM model from the source model.</p> 	
@@ -59,14 +56,18 @@ class TupiJvmModelInferrer extends AbstractModelInferrer {
 		// Here you explain how your model is mapped to Java elements, by writing the actual translation code.
 		val className = machine.eResource.URI.fileExtension;
 		acceptor.accept(machine.toClass(namespaceStr + "." + className), [
-			
+
+			/*
+			 * STATES
+			 * 
+			 */
 			val statesDecl = machine.body.statesDecl;
-			members += machine.toEnumerationType("_State")[
-				for(state : statesDecl.states){
-					members+=machine.toEnumerationLiteral(state.name);
+			members += machine.toEnumerationType("_State") [
+				for (state : statesDecl.states) {
+					members += machine.toEnumerationLiteral(state.name);
 				}
 			]
-				
+
 			members += machine.toField("_currentState", typeRef("_State"))
 			members += machine.toMethod("_match", typeRef(boolean)) [
 				parameters += machine.toParameter("statesToMatch", typeRef(String).addArrayTypeDimension)
@@ -75,13 +76,17 @@ class TupiJvmModelInferrer extends AbstractModelInferrer {
 					boolean matched = false;
 					if(statesToMatch!=null){
 						for(String s : statesToMatch){
-						matched = matched || java.util.regex.Pattern.matches(s, _currentState.name());
+							matched = matched || java.util.regex.Pattern.matches(s, _currentState.name());
 						}
 					}
 					return matched;
 				'''
 			]
 
+			/*
+			 * MEMORY
+			 * 
+			 */
 			val memoryDecl = machine.body.memoriesDecl;
 			for (memory : memoryDecl.memories) {
 				if (memory.type.typeMachine != null) {
@@ -92,38 +97,84 @@ class TupiJvmModelInferrer extends AbstractModelInferrer {
 				}
 
 			}
-			
+
+			/*
+			 * GUARDS
+			 * 
+			 */
 			val guardsDecl = machine.body.guardsDecl;
-			for(guard : guardsDecl.guards){
-				members+= guardsDecl.toMethod("guard_"+ guard.name, typeRef(boolean))[
-					body = '''return «guard.expression»;'''
+
+			// TODO
+			for (guard : guardsDecl.guards) {
+				members += guardsDecl.toMethod("guard_" + guard.name, typeRef(boolean)) [
+					body = '''return true;''';
 				]
 			}
 
+			/*
+			 * EVENTS
+			 * 
+			 */
 			val eventsDecl = machine.body.eventsDecl;
 			for (event : eventsDecl.events) {
-				members += eventsDecl.toMethod(event.name, typeRef(void)) [
-					val variables = event?.parameters?.variablesDecl;
-					if (variables != null) {
-						for (param : variables) {
-							parameters += param.toParameter(param.name, typeRef(String));
-						}
-					}
-					body = '''
-											
-						«FOR transition : event.transitions»
-							if(_match(«transition.originStates»){
-								if(guard_«transition.guard.name»()){
-									action_«transition.action.name»();
-									_currentState=_State.«transition.destState.name»;
-									return;
+				if (event.name.toLowerCase.equals("start")) {
+					members += eventsDecl.toConstructor [
+						val variables = event?.parameters?.variablesDecl;
+						if (variables != null) {
+							for (param : variables) {
+								if (param.type.typeMachine != null) {
+									parameters += param.toParameter(param.name, typeRef(param.type.typeMachine.name));
+								} else if (param.type.typePrimitive != null) {
+									parameters += param.toParameter(param.name, typeRef(param.type.typePrimitive));
 								}
+
 							}
-						«ENDFOR»
-					'''
-				]
+						}
+						body = '''
+							if(false){
+								/* Temporary workaround */
+							}
+							«FOR transition : event.transitions»
+								else if(_match(«transition.originStates.map[x | '"' + x + '"'].reduce[a,b| a + ', ' + b]»)){
+									if(guard_«transition.guard.name»()){
+										action_«transition.action.name»();
+										_currentState=_State.«transition.destState.name»;
+										return;
+									}
+								}
+							«ENDFOR»
+						'''
+					]
+				} else {
+					members += eventsDecl.toMethod(event.name, typeRef(void)) [
+						val variables = event?.parameters?.variablesDecl;
+						if (variables != null) {
+							for (param : variables) {
+								parameters += param.toParameter(param.name, typeRef(String));
+							}
+						}
+						body = '''
+							if(false){	
+								/* Temporary workaround */
+							}				
+							«FOR transition : event.transitions»
+								else if(_match(«transition.originStates.map[x | '"' + x + '"'].reduce[a,b| a + ', ' + b]»)){
+									if(guard_«transition.guard.name»()){
+										action_«transition.action.name»();
+										_currentState=_State.«transition.destState.name»;
+										return;
+									}
+								}
+							«ENDFOR»
+						'''
+					]
+				}
 			}
 
+			/*
+			 * ACTIONS
+			 * 
+			 */
 			val actionsDecl = machine.body.actionsDecl;
 			for (action : actionsDecl.actions) {
 				members += actionsDecl.toMethod("action_" + action.name, typeRef(void)) [
@@ -154,5 +205,11 @@ class TupiJvmModelInferrer extends AbstractModelInferrer {
 		super.infer(use, acceptor, isPreIndexingPhase);
 
 	}
+
+/*
+ * 
+ * UTILS
+ * 
+ */
 }
 
