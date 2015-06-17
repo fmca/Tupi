@@ -3,9 +3,14 @@
  */
 package br.ufpe.cin.generator
 
+import br.ufpe.cin.generator.MachineDeclared
+import br.ufpe.cin.tupi.MachineBody
+import br.ufpe.cin.tupi.MachineDecl
+import br.ufpe.cin.tupi.Model
+import java.util.HashMap
 import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.xtext.generator.IGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess
+import org.eclipse.xtext.generator.IGenerator
 
 /**
  * Generates code from your model files on save.
@@ -13,12 +18,83 @@ import org.eclipse.xtext.generator.IFileSystemAccess
  * See https://www.eclipse.org/Xtext/documentation/303_runtime_concepts.html#code-generation
  */
 class TupiGenerator implements IGenerator {
-	
-	override void doGenerate(Resource resource, IFileSystemAccess fsa) {
-//		fsa.generateFile('greetings.txt', 'People to greet: ' + 
-//			resource.allContents
-//				.filter(typeof(Greeting))
-//				.map[name]
-//				.join(', '))
+	HashMap<String, MachineDeclared> mapMachine = new HashMap<String, MachineDeclared>();
+	MachineDeclared machineMapped = null;
+	Event eventAux = null;
+
+	override def doGenerate(Resource resource, IFileSystemAccess fsa) {
+		createFiles(resource.contents.head as Model, fsa);
+		mapMachine.clear();
+		//fsa.generateFile(resource.className + ".dot", toDotCode(resource.contents.head as Model))
 	}
+	def createFiles(Model model, IFileSystemAccess fsa){
+		for (machine: model.machines){
+			fsa.generateFile(machine.name+".dot", toDotCode(machine))
+		}
+		
+	}
+	def className(Resource res) {
+		var name = res.URI.lastSegment
+		return name.substring(0, name.indexOf('.'))
+	}
+
+	def toDotCode(MachineDecl machine) '''
+		«machine.declareMachine»
+	'''
+
+	def declareMachine(MachineDecl machine) '''
+		digraph «machine.name» {
+			rankdir=LR;
+			«mapMachine.put(machine.name, machineMapped=new MachineDeclared())»
+			«IF machine.superType != null»
+				«machineMapped.heritage(mapMachine.get(machine.superType.typeRef))»
+			«ENDIF»
+			«machine.body.createClass»
+			«machine.body.declareBody»
+		}
+	'''
+
+	def void createClass(MachineBody body) {
+
+		for (state : body.statesDecl.states) {
+			if (!machineMapped.states.contains(state.name)) {
+				machineMapped.states.add(state.name);
+			}
+		}
+		for (event : body.eventsDecl.events) {
+			for (eventComp : machineMapped.events) {
+				if (eventComp.name.equals(event.name)) {
+					machineMapped.events.remove(eventComp);
+				}
+			}
+			machineMapped.events.add(eventAux = new Event(event.name));
+			for (trans : event.transitions) {
+				for (originState : trans.originStates) {
+					val regex = originState.replace("*", ".*");
+					for (state : machineMapped.states) {
+						if (state.matches(regex)) {
+							eventAux.trans.add(new Transition(state, trans.destState.name, trans.guard.name));
+						}
+					}
+
+				}
+			}
+		}
+	}
+
+	def declareBody(MachineBody body) '''
+		//states
+		«FOR state : machineMapped.states»
+			«state»;
+		«ENDFOR»
+		//edges
+		«FOR event : machineMapped.events»
+			«FOR tran : event.trans»
+				«tran.originState»->«tran.destState» [label="«event.name» | «tran.guard»"]; 
+			«ENDFOR»
+		«ENDFOR»
+	'''
+
+
+
 }
