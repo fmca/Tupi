@@ -64,7 +64,7 @@ class TupiJvmModelInferrer extends AbstractModelInferrer {
 
 	def dispatch void infer(MachineDecl machine, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
 		// Here you explain how your model is mapped to Java elements, by writing the actual translation code.
-		val className = machine.eResource.URI.trimFileExtension.lastSegment
+		val className = machine.name
 		acceptor.accept(machine.toClass(namespaceStr + "." + className), [
 
 			if (machine.superType != null) {
@@ -76,17 +76,18 @@ class TupiJvmModelInferrer extends AbstractModelInferrer {
 					 * STATES
 					 * 
 					 */
-					members += machine.toField("_states", typeRef(List))[
-						initializer='''new «typeRef(ArrayList)»()'''
-						visibility=JvmVisibility.PROTECTED
+					members += machine.toField("_states", typeRef(List)) [
+						initializer = '''new «typeRef(ArrayList)»()'''
+						visibility = JvmVisibility.PROTECTED
 					]
 
-					members += machine.toField("_currentState", typeRef(String))[
-						initializer='''""'''
-						visibility=JvmVisibility.PROTECTED
+					members += machine.toField("_currentState", typeRef(String)) [
+						initializer = '''""'''
+						visibility = JvmVisibility.PROTECTED
 					]
 					members += machine.toMethod("_match", typeRef(boolean)) [
 						parameters += machine.toParameter("statesToMatch", typeRef(String).addArrayTypeDimension)
+						visibility=JvmVisibility.PRIVATE
 						varArgs = true
 						body = '''
 							boolean matched = false;
@@ -143,6 +144,7 @@ class TupiJvmModelInferrer extends AbstractModelInferrer {
 				// TODO
 				for (guard : guardsDecl.guards) {
 					members += guardsDecl.toMethod("guard_" + guard.name, typeRef(boolean)) [
+						visibility=JvmVisibility.PRIVATE
 						body = guard.expr
 					]
 				}
@@ -153,81 +155,83 @@ class TupiJvmModelInferrer extends AbstractModelInferrer {
 			 * 
 			 */
 			val eventsDecl = machine.body.eventsDecl;
-
-			for (event : eventsDecl.events) {
-				val getParameters = [ EList<XExpression> parameters |
-					'''«FOR param : parameters SEPARATOR ','»
+			if (eventsDecl != null) {
+				for (event : eventsDecl.events) {
+					val getParameters = [ EList<XExpression> parameters |
+						'''«FOR param : parameters SEPARATOR ','»
 												«try{
 													xbaseInterpreter.evaluate(param).result
 												}catch(Exception e){
 													param
 												}
 												»«ENDFOR»'''
-				]
-				val getEventBody = [ EList<Transition> transitions |
-					'''
-						«FOR transition : transitions»
-							if(_match(«transition.originStates.map[x | '"' + x + '"'].reduce[a,b| a + ', ' + b]»)){
-								if(guard_«transition.guard.name»()){
-									action_«transition.action.name»(«getParameters.apply(transition.parameters)»);
-									_currentState="«transition.destState.name»";
-									«IF transition.triggers!=null»
-										«FOR trigger : transition.triggers»
-											
-											«IF trigger.event.name.toLowerCase.equals("start")»
-												«trigger.machine.name» = new «trigger.machine.type.typeRef» («getParameters.apply(trigger.parameters)»); 
-											«ELSE»
-												« if(trigger.machine != null){ trigger.machine.name + "."}» «trigger.event.name» («getParameters.apply(trigger.parameters) »);
-											«ENDIF»
-											
-										«ENDFOR»
-									«ENDIF»
-									return;
-								}
-							}
-							
-						«ENDFOR»
-					'''
-				]
-
-				if (event.name.toLowerCase.equals("start")) {
-
-					if (className.toLowerCase.equals("main")) {
-						members += eventsDecl.toMethod("main", typeRef(void), [
-							static = true
-							parameters += eventsDecl.toParameter("args", typeRef(String).addArrayTypeDimension)
-							body = '''new «className» ();'''
-						])
-					}
-					members += eventsDecl.toConstructor [
-						val variables = event?.parameters?.variablesDecl;
-						if (variables != null) {
-							for (param : variables) {
-								parameters += param.toParameter(param.name, param.type.typeRef);
-							}
-						}
-						body = '''
-						«IF machine.superType!=null»
-							super(«if(event.parameters!=null) event.parameters.variablesDecl.join(",")»);
-						«ENDIF»
-						«FOR state : machine.body.statesDecl.states»
-							_states.add("«state.name»");
-						«ENDFOR»						
-						«getEventBody.apply(event.transitions)»'''
 					]
-
-				} else {
-					members += eventsDecl.toMethod(event.name, typeRef(void)) [
-						val variables = event?.parameters?.variablesDecl;
-						if (variables != null) {
-							for (param : variables) {
-								parameters += param.toParameter(param.name, param.type.typeRef);
-							}
-						}
-						body = '''			
-							«getEventBody.apply(event.transitions)»
+					val getEventBody = [ EList<Transition> transitions |
+						'''
+							«FOR transition : transitions»
+								if(_match(«transition.originStates.map[x | '"' + x + '"'].reduce[a,b| a + ', ' + b]»)){
+									if(guard_«transition.guard.name»()){
+										action_«transition.action.name»(«getParameters.apply(transition.parameters)»);
+										_currentState="«transition.destState.name»";
+										«IF transition.triggers!=null»
+											«FOR trigger : transition.triggers»
+												«IF trigger.event !=null »
+													«IF trigger.event.name.toLowerCase.equals("start")»
+														«trigger.machine.name» = new «trigger.machine.type.typeRef.simpleName» («getParameters.apply(trigger.parameters)»); 
+													«ELSE»
+														« if(trigger.machine != null){ trigger.machine.name + "."}» «trigger.event.name» («getParameters.apply(trigger.parameters) »);
+													«ENDIF»
+												«ENDIF»
+												
+											«ENDFOR»
+										«ENDIF»
+										return;
+									}
+								}
+								
+							«ENDFOR»
 						'''
 					]
+
+					if (event.name.toLowerCase.equals("start")) {
+
+						if (className.toLowerCase.equals("main")) {
+							members += eventsDecl.toMethod("main", typeRef(void), [
+								static = true
+								parameters += eventsDecl.toParameter("args", typeRef(String).addArrayTypeDimension)
+								body = '''new «className» ();'''
+							])
+						}
+						members += eventsDecl.toConstructor [
+							val variables = event?.parameters?.variablesDecl;
+							if (variables != null) {
+								for (param : variables) {
+									parameters += param.toParameter(param.name, param.type.typeRef);
+								}
+							}
+							body = '''
+							«IF machine.superType!=null»
+								super(«if(event.parameters!=null) event.parameters.variablesDecl.join(",")»);
+							«ENDIF»
+							«FOR state : machine.body.statesDecl.states»
+								_states.add("«state.name»");
+							«ENDFOR»						
+							«getEventBody.apply(event.transitions)»'''
+						]
+
+					} else {
+						members += eventsDecl.toMethod(event.name, typeRef(void)) [
+							val variables = event?.parameters?.variablesDecl;
+							if (variables != null) {
+								for (param : variables) {
+									parameters += param.toParameter(param.name, param.type.typeRef);
+								}
+							}
+							body = '''			
+								«getEventBody.apply(event.transitions)»
+							'''
+						]
+					}
 				}
 			}
 
@@ -239,6 +243,7 @@ class TupiJvmModelInferrer extends AbstractModelInferrer {
 			for (action : actionsDecl.actions) {
 				members += actionsDecl.toMethod("action_" + action.name, typeRef(void)) [
 					val variables = action?.variableListDecl?.variablesDecl
+					visibility=JvmVisibility.PRIVATE
 					body = action.block
 
 					/*'''
