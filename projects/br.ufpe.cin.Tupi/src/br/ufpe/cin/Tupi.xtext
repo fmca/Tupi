@@ -6,144 +6,66 @@ Model:
 	namespace=NameSpace use+=UseDecl* machines+=MachineDecl*;
 
 NameSpace:
-	"namespace" name=QualifiedName
-;
+	"namespace" name=QualifiedName;
 
 UseDecl:
-	"use" importedNamespace=QualifiedName "as" type=TypeMachine;
+	"use" importedNamespace=QualifiedName;
 
 MachineDecl:
-	'machine' name=TypeMachine ("extends" superMachine=([TypeMachine]))? body=MachineBody;
+	'machine' name=ID ("extends" superType=Type)? body=MachineBody;
 
 MachineBody:
-	{MachineBody} memoriesDecl=MemoryDecl? statesDecl=StateDecl?  guardsDecl=GuardsDecl? actionsDecl=ActionsDecl? eventsDecl=EventsDecl?
-	;
+	{MachineBody} memoriesDecl=MemoryDecl? statesDecl=StateDecl? guardsDecl=GuardsDecl? actionsDecl=ActionsDecl?
+	eventsDecl=EventsDecl?;
 
 EventsDecl:
 	{EventsDecl} "events" events+=Event*;
 
 Event:
-	"{" name=ID "}" (parameters=VariableListDecl)? transitions+=Transition* ;
+	"{" name=ID "}" (parameters=VariableListDecl)? transitions+=Transition*;
 
 Transition:
-	{Transition} "[" originStates+=STATEPATTERNDECL? ("," originStates+=STATEPATTERNDECL)* "]" "->" destState=[State] "|"  guard=[Guard]
-	action=[Action] ("("parameters+=Expression ("," parameters+=Expression)* ")")?;
+	{Transition} "when" "[" originStates+=STATEPATTERNDECL? ("," originStates+=STATEPATTERNDECL)* "]" "->" destState=[State] "if"
+	guard=[Guard] "do"
+	action=[Action] ("(" parameters+=XExpression ("," parameters+=XExpression)* ")")? ("=>" triggers+=TriggerEvent)*;
 
 ActionsDecl:
 	{ActionsDecl} "actions" actions+=Action*;
 
 Action:
-	name=ID (variableListDecl=VariableListDecl)? commands+=Command*;
+	name=ID (variableListDecl=VariableListDecl)? block=(XBlockExpression) //TupiBlockExpression; //commands+=Command*;
 
-Command:
-	TriggerEvent | Attribution | ExternalReference;
-
-ExternalReference:
-	machine=[Memory] (DOT attr+=Variable)+ var=VariableList?
-	| super="super" (DOT attr+=Variable)+ var=VariableList?
 ;
 
 TriggerEvent:
-	"trigger" event=[Event] (parameters+=Expression ("," parameters+=Expression)*)? ("on" machine=[Memory])?;
+	"trigger" event=[Event] (parameters+=XExpression ("," parameters+=XExpression)*)? ("on" machine=[Memory])?;
 
 GuardsDecl:
 	{GuardsDecl} "guards" guards+=Guard ("," guards+=Guard)*;
 
 Guard:
-	name=ID "=" expression=Expression;
-	
-
-Expression:
-	 expr=ExpressionBinary | expr=ExprUnary;
-	 
-ExpressionBinary:
-	expr=ExprBinaryWithoutParentesis | "(" Expression ")" 
-;
-Value:
-	{Value} int=INT | str=STRING | bool=BOOLEAN | var=Variable | machAttr=ExternalReference;
-
-
-	//Comparators -> Weak precedence
-ExprBinaryWithoutParentesis:
-	left=ExprBinaryAddSub (op+=BINARYOPCOMP right+=ExprBinaryAddSub)*;
-
-	//Add and Sub -> Middle precedence
-ExprBinaryAddSub:
-	left=ExprBinaryMultDiv (op+=BINARYOPADDSUB right+=ExprBinaryMultDiv)*;
-
-	//Mult, Div -> High precedence 
-ExprBinaryMultDiv:
-	left=Value (op+=BINARYOPMULTDIV right+=Value)*;
-
-terminal BINARYOPCOMP:
-	"==" | ">" | "<" | "<=" | ">=";
-
-terminal BINARYOPADDSUB:
-	"+" | "-";
-
-terminal BINARYOPMULTDIV:
-	"*" | "/" | "%";
-
-ExprUnary:
-	UNARYOP Expression;
-
-terminal UNARYOP:
-	"-" | "!";
+	name=ID "=" expr=XExpression;
 
 MemoryDecl:
 	{MemoryDecl} "memory" (memories+=Memory ("," memories+=Memory)*)?;
 
-Attribution:
-	left=[Memory] "=" right=AttributionRight;
-	
-AttributionRight:
-	Expression
-;
-
-/*MachineAttributeUse:
-	machine=[Memory] (DOT attr+=Variable)+;*/
-
-terminal DOT:
-	"."
-;
-
 Memory:
 	type=Type name=ID;
 
-
 Type:
-	typeMachine=[TypeMachine] | typePrimitive=TYPEPRIMITIVE
-;
-
-TYPEPRIMITIVE:
-	"int" | "boolean" | "String"
-;
-TypeMachine:
-	name=ID
-;
+	typeRef=JvmTypeReference;
 
 StateDecl:
 	{StateDecl} "states" states+=State ("," states+=State)*;
 
 State:
 	name=ID;
-	
+
 STATEPATTERNDECL:
-	("*"? ID "*"?) | "*"
-;
+	("*"? ID "*"?) | "*";
 
 VariableListDecl:
-"(" variablesDecl+=VariableDecl ("," variablesDecl+=VariableDecl)* ")";
+	"(" variablesDecl+=VariableDecl ("," variablesDecl+=VariableDecl)* ")";
 
-VariableList:
-	{VariableList} "(" variables+=Variable ("," variables+=Variable)* ")";
-
-Variable:
-	name=ID;
-	
 VariableDecl:
-	type=Type name=ID
-;
-
-terminal BOOLEAN:
-	'true' | 'false';
+	type=Type name=ID;

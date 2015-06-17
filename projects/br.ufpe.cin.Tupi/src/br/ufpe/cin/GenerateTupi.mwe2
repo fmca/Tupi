@@ -65,9 +65,9 @@ Workflow {
     
     		// The antlr parser generator fragment.
     		fragment = parser.antlr.XtextAntlrGeneratorFragment auto-inject {
-    		//  options = {
-    		//      backtrack = true
-    		//  }
+    		  options = {
+    		      backtrack = true
+    		  }
     		}
     
     		// Xtend-based API for validation
@@ -81,7 +81,9 @@ Workflow {
     		// fragment = exporting.SimpleNamesFragment auto-inject {}
     
     		// scoping and exporting API
-    		fragment = scoping.ImportNamespacesScopingFragment auto-inject {}
+    		fragment = scoping.ImportNamespacesScopingFragment auto-inject {
+    			generateStub=false
+    		}
     		fragment = exporting.QualifiedNamesFragment auto-inject {}
     		fragment = builder.BuilderIntegrationFragment auto-inject {}
     
