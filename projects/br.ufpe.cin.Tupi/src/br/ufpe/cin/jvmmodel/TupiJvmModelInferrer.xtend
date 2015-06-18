@@ -87,7 +87,7 @@ class TupiJvmModelInferrer extends AbstractModelInferrer {
 					]
 					members += machine.toMethod("_match", typeRef(boolean)) [
 						parameters += machine.toParameter("statesToMatch", typeRef(String).addArrayTypeDimension)
-						visibility=JvmVisibility.PRIVATE
+						visibility = JvmVisibility.PROTECTED
 						varArgs = true
 						body = '''
 							boolean matched = false;
@@ -144,7 +144,7 @@ class TupiJvmModelInferrer extends AbstractModelInferrer {
 				// TODO
 				for (guard : guardsDecl.guards) {
 					members += guardsDecl.toMethod("guard_" + guard.name, typeRef(boolean)) [
-						visibility=JvmVisibility.PRIVATE
+						visibility = JvmVisibility.PROTECTED
 						body = guard.expr
 					]
 				}
@@ -240,32 +240,36 @@ class TupiJvmModelInferrer extends AbstractModelInferrer {
 			 * 
 			 */
 			val actionsDecl = machine.body.actionsDecl;
-			for (action : actionsDecl.actions) {
-				members += actionsDecl.toMethod("action_" + action.name, typeRef(void)) [
-					val variables = action?.variableListDecl?.variablesDecl
-					visibility=JvmVisibility.PRIVATE
-					body = action.block
 
-					/*'''
-					 * 		«FOR tupiExpr : action.block.expressions»
-					 * 			«IF tupiExpr.trigger != null»
-					 * 			«tupiExpr.trigger.machine.name».«tupiExpr.trigger.event»(
-					 * 				«tupiExpr.trigger.parameters.join(",")»
-					 * 			);
-					 * 			«ELSEIF tupiExpr.xexpr != null»
-					 * 				«tupiExpr.xexpr»
-					 * 			«ENDIF»
-					 * 		«ENDFOR»
-					 '''*/
-					if (variables != null) {
+			if (actionsDecl.actions != null) {
+				for (action : actionsDecl.actions) {
+					members += actionsDecl.toMethod("action_" + action.name, typeRef(void)) [
+						val variables = action?.variableListDecl?.variablesDecl
+						visibility = JvmVisibility.PROTECTED
+						body = action.block
 
-						for (param : variables) {
-							parameters += param.toParameter(param.name, param.type.typeRef)
+						/*'''
+						 * 		«FOR tupiExpr : action.block.expressions»
+						 * 			«IF tupiExpr.trigger != null»
+						 * 			«tupiExpr.trigger.machine.name».«tupiExpr.trigger.event»(
+						 * 				«tupiExpr.trigger.parameters.join(",")»
+						 * 			);
+						 * 			«ELSEIF tupiExpr.xexpr != null»
+						 * 				«tupiExpr.xexpr»
+						 * 			«ENDIF»
+						 * 		«ENDFOR»
+						 '''*/
+						if (variables != null) {
+
+							for (param : variables) {
+								parameters += param.toParameter(param.name, param.type.typeRef)
+							}
+
 						}
 
-					}
+					]
+				}
 
-				]
 			}
 
 		])
