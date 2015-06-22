@@ -3,8 +3,12 @@
  */
 package br.ufpe.cin.formatting
 
+import br.ufpe.cin.services.TupiGrammarAccess
+import com.google.inject.Inject
+import org.eclipse.xtext.Keyword
 import org.eclipse.xtext.formatting.impl.AbstractDeclarativeFormatter
 import org.eclipse.xtext.formatting.impl.FormattingConfig
+
 // import com.google.inject.Inject;
 // import br.ufpe.cin.services.TupiGrammarAccess
 
@@ -18,13 +22,68 @@ import org.eclipse.xtext.formatting.impl.FormattingConfig
  */
 class TupiFormatter extends AbstractDeclarativeFormatter {
 
-//	@Inject extension TupiGrammarAccess
+	@Inject extension TupiGrammarAccess tg
 	
 	override protected void configureFormatting(FormattingConfig c) {
 // It's usually a good idea to activate the following three statements.
 // They will add and preserve newlines around comments
-//		c.setLinewrap(0, 1, 2).before(SL_COMMENTRule)
-//		c.setLinewrap(0, 1, 2).before(ML_COMMENTRule)
-//		c.setLinewrap(0, 1, 1).after(ML_COMMENTRule)
+		c.setLinewrap(0, 1, 2).before(SL_COMMENTRule)
+		c.setLinewrap(0, 1, 2).before(ML_COMMENTRule)
+		c.setLinewrap(0, 1, 1).after(ML_COMMENTRule)
+		
+		c.setLinewrap(2).after(tg.nameSpaceRule);
+		c.setLinewrap().after(tg.useDeclRule);
+		
+		c.setLinewrap(2).before(tg.machineDeclRule);
+		
+		c.setLinewrap().before(tg.memoryDeclRule);
+		c.setIndentationIncrement().before(tg.memoryDeclRule);
+		c.setIndentationDecrement().after(tg.memoryDeclRule);
+		c.setLinewrap().after(tg.memoryDeclRule);
+		c.setLinewrap().before(tg.memoryRule);
+		c.setIndentationIncrement().before(tg.memoryRule)
+		c.setIndentationDecrement().after(tg.memoryRule)
+		
+		c.setIndentationIncrement().before(tg.stateDeclRule)
+		c.setIndentationDecrement().after(tg.stateDeclRule);
+		c.setLinewrap().after(tg.stateDeclRule);
+		c.setLinewrap().before(tg.stateRule);
+		c.setIndentationIncrement().before(tg.stateRule)
+		c.setIndentationDecrement().after(tg.stateRule)
+		
+		c.setIndentationIncrement().before(tg.guardsDeclRule)
+		c.setIndentationDecrement().after(tg.guardsDeclRule);
+		c.setLinewrap().after(tg.guardsDeclRule);
+		c.setLinewrap().before(tg.guardRule);
+		c.setIndentationIncrement().before(tg.guardRule)
+		c.setIndentationDecrement().after(tg.guardRule)
+		
+		c.setIndentationIncrement().before(tg.actionsDeclRule)
+		c.setIndentationDecrement().after(tg.actionsDeclRule);
+		c.setLinewrap().after(tg.actionsDeclRule);
+		c.setLinewrap().before(tg.actionRule);
+		c.setIndentationIncrement().before(tg.actionRule)
+		c.setIndentationDecrement().after(tg.actionRule)
+		
+		
+		c.setIndentationIncrement().before(tg.eventsDeclRule)
+		c.setIndentationDecrement().after(tg.eventsDeclRule);
+		c.setLinewrap().after(tg.eventsDeclRule);
+		c.setLinewrap().before(tg.eventRule);
+		c.setIndentationIncrement().before(tg.eventRule)
+		c.setIndentationDecrement().after(tg.eventRule)
+		
+		c.setIndentationIncrement().before(tg.transitionRule)
+		c.setIndentationDecrement().after(tg.transitionRule);
+		c.setLinewrap().after(tg.transitionRule);
+		c.setLinewrap().before(tg.transitionRule);
+		
+		
+		// set no space before all commas
+        for(Keyword comma : tg.findKeywords(",")) {
+            c.setNoSpace().before(comma);
+        }
+		
+		
 	}
 }
