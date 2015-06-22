@@ -3,7 +3,7 @@ grammar br.ufpe.cin.Tupi with org.eclipse.xtext.xbase.Xbase
 generate tupi "http://www.ufpe.br/cin/Tupi"
 
 Model:
-	namespace=NameSpace use+=UseDecl* machines+=MachineDecl*;
+	namespace=NameSpace use+=UseDecl* machine=MachineDecl?;
 
 NameSpace:
 	"namespace" name=QualifiedName;
@@ -12,7 +12,7 @@ UseDecl:
 	"use" importedNamespace=QualifiedName;
 
 MachineDecl:
-	'machine' name=ID ("extends" superType=Type)? body=MachineBody;
+	'machine' name=ID ("extends" superType=[MachineDecl])? body=MachineBody;
 
 MachineBody:
 	{MachineBody} memoriesDecl=MemoryDecl? statesDecl=StateDecl? guardsDecl=GuardsDecl? actionsDecl=ActionsDecl?
@@ -25,9 +25,9 @@ Event:
 	"{" name=ID "}" (parameters=VariableListDecl)? transitions+=Transition*;
 
 Transition:
-	{Transition} "when" "[" originStates+=STATEPATTERNDECL? ("," originStates+=STATEPATTERNDECL)* "]" "->" destState=[State] "if"
-	guard=[Guard] "do"
-	action=[Action] ("(" parameters+=XExpression ("," parameters+=XExpression)* ")")? ("=>" triggers+=TriggerEvent)*;
+	{Transition} "when" "[" originStates+=STATEPATTERNDECL? ("," originStates+=STATEPATTERNDECL)* "]" "->" destState=[State|QualifiedName] "if"
+	guard=[Guard|QualifiedName] "do"
+	action=[Action|QualifiedName] ("(" parameters+=XExpression ("," parameters+=XExpression)* ")")? ("=>" triggers+=TriggerEvent)*;
 
 ActionsDecl:
 	{ActionsDecl} "actions" actions+=Action*;
@@ -38,7 +38,7 @@ Action:
 ;
 
 TriggerEvent:
-	"trigger" event=[Event] (parameters+=XExpression ("," parameters+=XExpression)*)? ("on" machine=[Memory])?;
+	"trigger" event=[Event|QualifiedName] (parameters+=XExpression ("," parameters+=XExpression)*)? ("on" machine=[Memory|QualifiedName])?;
 
 GuardsDecl:
 	{GuardsDecl} "guards" guards+=Guard ("," guards+=Guard)*;

@@ -3,9 +3,43 @@
  */
 package br.ufpe.cin;
 
+import org.eclipse.xtext.generator.IGenerator;
+import org.eclipse.xtext.naming.IQualifiedNameProvider;
+import org.eclipse.xtext.scoping.IScopeProvider;
+
+import br.ufpe.cin.generator.AuxGenerator;
+import br.ufpe.cin.scoping.TupiQNP;
+import br.ufpe.cin.scoping.TupiScopeProvider;
+
 /**
- * Use this class to register components to be used at runtime / without the Equinox extension registry.
+ * Use this class to register components to be used at runtime / without the
+ * Equinox extension registry.
  */
 public class TupiRuntimeModule extends br.ufpe.cin.AbstractTupiRuntimeModule {
 
+	@Override
+	public Class<? extends IGenerator> bindIGenerator() {
+		return AuxGenerator.class;
+	}
+
+	@Override
+	public Class<? extends IQualifiedNameProvider> bindIQualifiedNameProvider() {
+		return TupiQNP.class;
+	}
+	
+	  @Override public Class<? extends IScopeProvider> bindIScopeProvider() {
+	  return TupiScopeProvider.class; }
+	  
+	  /*@Override public Class<? extends IDefaultResourceDescriptionStrategy>
+	  bindIDefaultResourceDescriptionStrategy() { return
+	  TupiResourceDescriptionStrategy.class; }
+	 
+
+	@Override
+	public void configureIScopeProviderDelegate(com.google.inject.Binder binder) {
+		binder.bind(org.eclipse.xtext.scoping.IScopeProvider.class)
+				.annotatedWith(com.google.inject.name.Names
+						.named(org.eclipse.xtext.scoping.impl.AbstractDeclarativeScopeProvider.NAMED_DELEGATE))
+				.to(TupiINALSP.class);
+	}*/
 }

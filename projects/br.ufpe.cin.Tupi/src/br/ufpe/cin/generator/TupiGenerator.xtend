@@ -3,10 +3,10 @@
  */
 package br.ufpe.cin.generator
 
-import br.ufpe.cin.generator.MachineDeclared
 import br.ufpe.cin.tupi.MachineBody
 import br.ufpe.cin.tupi.MachineDecl
 import br.ufpe.cin.tupi.Model
+import java.io.File
 import java.util.HashMap
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.IFileSystemAccess
@@ -25,14 +25,18 @@ class TupiGenerator implements IGenerator {
 	override def doGenerate(Resource resource, IFileSystemAccess fsa) {
 		createFiles(resource.contents.head as Model, fsa);
 		mapMachine.clear();
-		//fsa.generateFile(resource.className + ".dot", toDotCode(resource.contents.head as Model))
+	// fsa.generateFile(resource.className + ".dot", toDotCode(resource.contents.head as Model))
 	}
-	def createFiles(Model model, IFileSystemAccess fsa){
-		for (machine: model.machines){
-			fsa.generateFile(machine.name+".dot", toDotCode(machine))
+
+	def createFiles(Model model, IFileSystemAccess fsa) {
+		if(model.machine!=null){
+			
+			fsa.generateFile(new File(model.namespace.name.replace(".", "/"), model.machine.name + ".dot").path,
+				toDotCode(model.machine))
 		}
-		
+
 	}
+
 	def className(Resource res) {
 		var name = res.URI.lastSegment
 		return name.substring(0, name.indexOf('.'))
@@ -47,7 +51,9 @@ class TupiGenerator implements IGenerator {
 			rankdir=LR;
 			«mapMachine.put(machine.name, machineMapped=new MachineDeclared())»
 			«IF machine.superType != null»
-				«machineMapped.heritage(mapMachine.get(machine.superType.typeRef))»
+				« try{machineMapped.heritage(mapMachine.get(machine.superType.name))}catch(Exception e){
+					println(e)
+				}»
 			«ENDIF»
 			«machine.body.createClass»
 			«machine.body.declareBody»
@@ -56,20 +62,20 @@ class TupiGenerator implements IGenerator {
 
 	def void createClass(MachineBody body) {
 
-		for (state : body.statesDecl.states) {
+		for (state : body?.statesDecl?.states) {
 			if (!machineMapped.states.contains(state.name)) {
 				machineMapped.states.add(state.name);
 			}
 		}
-		for (event : body.eventsDecl.events) {
+		for (event : body?.eventsDecl?.events) {
 			for (eventComp : machineMapped.events) {
 				if (eventComp.name.equals(event.name)) {
 					machineMapped.events.remove(eventComp);
 				}
 			}
 			machineMapped.events.add(eventAux = new Event(event.name));
-			for (trans : event.transitions) {
-				for (originState : trans.originStates) {
+			for (trans : event?.transitions) {
+				for (originState : trans?.originStates) {
 					val regex = originState.replace("*", ".*");
 					for (state : machineMapped.states) {
 						if (state.matches(regex)) {
@@ -89,12 +95,10 @@ class TupiGenerator implements IGenerator {
 		«ENDFOR»
 		//edges
 		«FOR event : machineMapped.events»
-			«FOR tran : event.trans»
+			«FOR tran : event?.trans»
 				«tran.originState»->«tran.destState» [label="«event.name» | «tran.guard»"]; 
 			«ENDFOR»
 		«ENDFOR»
 	'''
-
-
 
 }

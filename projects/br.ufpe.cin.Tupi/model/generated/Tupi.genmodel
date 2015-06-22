@@ -10,7 +10,7 @@
     <genClasses ecoreClass="Tupi.ecore#//Model">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//Model/namespace"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//Model/use"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//Model/machines"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//Model/machine"/>
     </genClasses>
     <genClasses ecoreClass="Tupi.ecore#//NameSpace">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Tupi.ecore#//NameSpace/name"/>
@@ -20,7 +20,7 @@
     </genClasses>
     <genClasses ecoreClass="Tupi.ecore#//MachineDecl">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Tupi.ecore#//MachineDecl/name"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//MachineDecl/superType"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Tupi.ecore#//MachineDecl/superType"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Tupi.ecore#//MachineDecl/body"/>
     </genClasses>
     <genClasses ecoreClass="Tupi.ecore#//MachineBody">

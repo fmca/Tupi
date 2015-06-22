@@ -3,7 +3,17 @@
  */
 package br.ufpe.cin.validation
 
+import br.ufpe.cin.tupi.Action
+import br.ufpe.cin.tupi.MachineDecl
+import br.ufpe.cin.tupi.Transition
+import br.ufpe.cin.tupi.TupiPackage
+import java.util.HashMap
+import org.eclipse.xtext.validation.Check
+import com.google.inject.Inject
+import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter
+
 //import org.eclipse.xtext.validation.Check
+
 
 /**
  * This class contains custom validation rules. 
@@ -11,7 +21,78 @@ package br.ufpe.cin.validation
  * See https://www.eclipse.org/Xtext/documentation/303_runtime_concepts.html#validation
  */
 class TupiValidator extends AbstractTupiValidator {
+	@Inject private XbaseInterpreter xbaseInterpreter;
 
+@Check
+def checkMachineNameCapital(MachineDecl machine){
+		if(Character.isLowerCase((machine.name.charAt(0)))){
+			warning("Review first letter (lower case).", TupiPackage.Literals.MACHINE_DECL__NAME);
+		}
+	}
+	
+@Check
+	def checkSelfInheritance(MachineDecl machine) {
+		var machineName = machine.name;
+		var extendMachineName =  machine.superType.name;
+		
+		if (machineName.equals(extendMachineName)) 
+			error("Machine cannot extends itself", TupiPackage.Literals.MACHINE_DECL__SUPER_TYPE);
+	}
+	
+	
+	@Check
+	
+	def checkElementsInheritance(MachineDecl machine){
+		
+	}
+	
+//	@Check
+	def checkActionParameters(Transition t) {
+		
+		try{
+		
+		val getParamsAction = [Action action | 
+			var params = ""
+			if(action.variableListDecl!=null){
+				for(param : action.variableListDecl.variablesDecl){
+				params += param.type.typeRef.simpleName;
+			}
+			}
+			
+			params
+		]
+		
+		val getParamsTrans = [Transition trans | 
+			
+			var params = ""
+			if(trans.parameters!=null){
+				for(param : trans.parameters){
+						params+=xbaseInterpreter.evaluate(param).result.class.name
+				
+				
+			}
+			}
+			
+			
+			params
+		]
+		val actionParameters = getParamsAction.apply(t.action);
+		val transParameters = getParamsTrans.apply(t);
+
+		if(!actionParameters.equals(transParameters)){
+			error("Wrong arguments: "+ actionParameters + ", " + transParameters, TupiPackage.Literals.TRANSITION__PARAMETERS);
+		}else{
+			warning("testing: " + actionParameters + ", " + transParameters,  TupiPackage.Literals.TRANSITION__PARAMETERS);
+		}
+		
+		}catch(Exception e){
+			println(e)
+			e.printStackTrace
+		}
+		
+		
+	}
+	
 //  public static val INVALID_NAME = 'invalidName'
 //
 //	@Check

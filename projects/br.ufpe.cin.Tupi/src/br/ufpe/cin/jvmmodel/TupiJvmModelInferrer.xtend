@@ -6,10 +6,12 @@ import br.ufpe.cin.tupi.Transition
 import br.ufpe.cin.tupi.UseDecl
 import com.google.inject.Inject
 import com.google.inject.Provider
+import java.util.ArrayList
 import java.util.List
 import org.eclipse.emf.common.util.EList
 import org.eclipse.xtext.common.types.JvmDeclaredType
 import org.eclipse.xtext.common.types.JvmVisibility
+import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.xbase.XExpression
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter
@@ -17,7 +19,6 @@ import org.eclipse.xtext.xbase.jvmmodel.AbstractModelInferrer
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor.IPostIndexingInitializing
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
-import java.util.ArrayList
 
 /**
  * <p>Infers a JVM model from the source model.</p> 	
@@ -31,7 +32,7 @@ class TupiJvmModelInferrer extends AbstractModelInferrer {
 	 * convenience API to build and initialize JVM types and their members.
 	 */
 	@Inject private XbaseInterpreter xbaseInterpreter;
-
+	@Inject private IQualifiedNameProvider qualifiedNameProvider;
 	@Inject private Provider<IEvaluationContext> contextProvider;
 	@Inject extension JvmTypesBuilder
 
@@ -68,7 +69,8 @@ class TupiJvmModelInferrer extends AbstractModelInferrer {
 		acceptor.accept(machine.toClass(namespaceStr + "." + className), [
 
 			if (machine.superType != null) {
-				superTypes += machine.superType.typeRef
+				superTypes += typeRef(qualifiedNameProvider.getFullyQualifiedName(machine.superType).toString);
+				
 			} else {
 				val statesDecl = machine.body.statesDecl;
 				if (statesDecl != null) {
@@ -241,13 +243,12 @@ class TupiJvmModelInferrer extends AbstractModelInferrer {
 			 */
 			val actionsDecl = machine.body.actionsDecl;
 
-			if (actionsDecl.actions != null) {
+			if (actionsDecl?.actions != null) {
 				for (action : actionsDecl.actions) {
 					members += actionsDecl.toMethod("action_" + action.name, typeRef(void)) [
 						val variables = action?.variableListDecl?.variablesDecl
 						visibility = JvmVisibility.PROTECTED
 						body = action.block
-
 						/*'''
 						 * 		«FOR tupiExpr : action.block.expressions»
 						 * 			«IF tupiExpr.trigger != null»
