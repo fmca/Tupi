@@ -51,7 +51,7 @@ class TupiGenerator implements IGenerator {
 			rankdir=LR;
 			«mapMachine.put(machine.name, machineMapped=new MachineDeclared())»
 			«IF machine.superType != null»
-				« try{machineMapped.heritage(mapMachine.get(machine.superType.name))}catch(Exception e){
+				« try{machineMapped.heritage(machine.superType)}catch(Exception e){
 					println(e)
 				}»
 			«ENDIF»
