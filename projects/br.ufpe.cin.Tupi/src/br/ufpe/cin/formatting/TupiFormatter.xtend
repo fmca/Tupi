@@ -39,45 +39,47 @@ class TupiFormatter extends AbstractDeclarativeFormatter {
 		c.setLinewrap().before(tg.memoryDeclRule);
 		c.setIndentationIncrement().before(tg.memoryDeclRule);
 		c.setIndentationDecrement().after(tg.memoryDeclRule);
-		c.setLinewrap().after(tg.memoryDeclRule);
 		c.setLinewrap().before(tg.memoryRule);
 		c.setIndentationIncrement().before(tg.memoryRule)
 		c.setIndentationDecrement().after(tg.memoryRule)
 		
+		c.setLinewrap().before(tg.stateDeclRule);
 		c.setIndentationIncrement().before(tg.stateDeclRule)
 		c.setIndentationDecrement().after(tg.stateDeclRule);
-		c.setLinewrap().after(tg.stateDeclRule);
 		c.setLinewrap().before(tg.stateRule);
 		c.setIndentationIncrement().before(tg.stateRule)
 		c.setIndentationDecrement().after(tg.stateRule)
 		
+		c.setLinewrap().before(tg.guardsDeclRule);
 		c.setIndentationIncrement().before(tg.guardsDeclRule)
 		c.setIndentationDecrement().after(tg.guardsDeclRule);
-		c.setLinewrap().after(tg.guardsDeclRule);
 		c.setLinewrap().before(tg.guardRule);
 		c.setIndentationIncrement().before(tg.guardRule)
 		c.setIndentationDecrement().after(tg.guardRule)
 		
+		c.setLinewrap().before(tg.actionsDeclRule);
 		c.setIndentationIncrement().before(tg.actionsDeclRule)
 		c.setIndentationDecrement().after(tg.actionsDeclRule);
-		c.setLinewrap().after(tg.actionsDeclRule);
 		c.setLinewrap().before(tg.actionRule);
 		c.setIndentationIncrement().before(tg.actionRule)
 		c.setIndentationDecrement().after(tg.actionRule)
 		
-		
+		c.setLinewrap().before(tg.eventsDeclRule);
 		c.setIndentationIncrement().before(tg.eventsDeclRule)
 		c.setIndentationDecrement().after(tg.eventsDeclRule);
-		c.setLinewrap().after(tg.eventsDeclRule);
 		c.setLinewrap().before(tg.eventRule);
 		c.setIndentationIncrement().before(tg.eventRule)
 		c.setIndentationDecrement().after(tg.eventRule)
 		
+		c.setLinewrap().before(tg.transitionRule);
 		c.setIndentationIncrement().before(tg.transitionRule)
-		c.setIndentationDecrement().after(tg.transitionRule);
-		c.setLinewrap().after(tg.transitionRule);
+		c.setIndentationDecrement().after(tg.transitionRule)
 		c.setLinewrap().before(tg.transitionRule);
 		
+		
+		c.setLinewrap().before(tg.triggerEventRule);
+		c.setIndentationIncrement().before(tg.triggerEventRule)
+		c.setIndentationDecrement().after(tg.triggerEventRule);
 		
 		// set no space before all commas
         for(Keyword comma : tg.findKeywords(",")) {
