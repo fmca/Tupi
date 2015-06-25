@@ -3,104 +3,93 @@
  */
 package br.ufpe.cin.validation
 
-import br.ufpe.cin.tupi.Action
+import br.ufpe.cin.tupi.Event
 import br.ufpe.cin.tupi.MachineDecl
 import br.ufpe.cin.tupi.Transition
 import br.ufpe.cin.tupi.TupiPackage
-import java.util.HashMap
-import org.eclipse.xtext.validation.Check
 import com.google.inject.Inject
+import org.eclipse.xtext.EcoreUtil2
+import org.eclipse.xtext.validation.Check
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter
+import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputer
+import br.ufpe.cin.tupi.MachineBody
+import org.eclipse.xtext.xbase.jvmmodel.IJvmModelInferrer
+import org.eclipse.xtext.xbase.jvmmodel.JvmTypeReferenceBuilder
+import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
+import br.ufpe.cin.jvmmodel.TupiJvmModelInferrer
+import br.ufpe.cin.tupi.VariableDecl
 
 //import org.eclipse.xtext.validation.Check
-
-
 /**
  * This class contains custom validation rules. 
- *
+ * 
  * See https://www.eclipse.org/Xtext/documentation/303_runtime_concepts.html#validation
  */
 class TupiValidator extends AbstractTupiValidator {
 	@Inject private XbaseInterpreter xbaseInterpreter;
+	@Inject private ITypeComputer typeComputer
+	@Inject private TupiJvmModelInferrer jvmInferrer
 
-@Check
-def checkMachineNameCapital(MachineDecl machine){
-		if(Character.isLowerCase((machine.name.charAt(0)))){
+	@Check
+	def checkMachineNameCapital(MachineDecl machine) {
+		if (Character.isLowerCase((machine.name.charAt(0)))) {
 			warning("Review first letter (lower case).", TupiPackage.Literals.MACHINE_DECL__NAME);
 		}
 	}
-	
-@Check
+
+	@Check
 	def checkSelfInheritance(MachineDecl machine) {
 		var machineName = machine.name;
-		var extendMachineName =  machine.superType.name;
-		
-		if (machineName.equals(extendMachineName)) 
+		var extendMachineName = machine.superType.name;
+
+		if (machineName.equals(extendMachineName))
 			error("Machine cannot extends itself", TupiPackage.Literals.MACHINE_DECL__SUPER_TYPE);
 	}
-	
-	
-	@Check
-	
-	def checkElementsInheritance(MachineDecl machine){
-		
-	}
-	
-//	@Check
-	def checkActionParameters(Transition t) {
-		
-		try{
-		
-		val getParamsAction = [Action action | 
-			var params = ""
-			if(action.variableListDecl!=null){
-				for(param : action.variableListDecl.variablesDecl){
-				params += param.type.typeRef.simpleName;
-			}
-			}
-			
-			params
-		]
-		
-		val getParamsTrans = [Transition trans | 
-			
-			var params = ""
-			if(trans.parameters!=null){
-				for(param : trans.parameters){
-						params+=xbaseInterpreter.evaluate(param).result.class.name
-				
-				
-			}
-			}
-			
-			
-			params
-		]
-		val actionParameters = getParamsAction.apply(t.action);
-		val transParameters = getParamsTrans.apply(t);
 
-		if(!actionParameters.equals(transParameters)){
-			error("Wrong arguments: "+ actionParameters + ", " + transParameters, TupiPackage.Literals.TRANSITION__PARAMETERS);
-		}else{
-			warning("testing: " + actionParameters + ", " + transParameters,  TupiPackage.Literals.TRANSITION__PARAMETERS);
+	@Check
+	def checkStartConstructor(Event event) {
+
+		val getStartEvent = [ MachineDecl a |
+			a.body?.eventsDecl?.events.filter[Event e|e.name.toLowerCase.equals("start")]?.get(0)
+		]
+		val compareParamSizes = [ Event a, Event b |
+			a.parameters?.variablesDecl?.size == b.parameters?.variablesDecl?.size
+		]
+
+		val isTypesEquals = [ Event a, Event b |
+			var answer = true;
+			for (var i = 0; i < a.parameters?.variablesDecl?.size; i++) {
+				val superParamType = a.parameters.variablesDecl.get(0).type.typeRef.qualifiedName
+				val thisParamType = b.parameters.variablesDecl.get(0).type.typeRef.qualifiedName
+
+				answer = answer && superParamType.equals(thisParamType)
+			}
+			answer
+		]
+
+		if (event.name.toLowerCase.equals("start")) {
+			val machine = EcoreUtil2.getContainerOfType(event, MachineDecl);
+			if (machine.superType != null) {
+				val event2 = getStartEvent.apply(machine.superType);
+				InputOutput.println("sizes: " + compareParamSizes.apply(event, event2) + ", types: " +
+					isTypesEquals.apply(event, event2));
+				if (!(compareParamSizes.apply(event, event2) && isTypesEquals.apply(event, event2))) {
+					error("{Start} parameters must be the same of the super machine.",
+						TupiPackage.Literals.EVENT__PARAMETERS);
+				}
+			}
 		}
-		
-		}catch(Exception e){
-			println(e)
-			e.printStackTrace
-		}
-		
-		
+
 	}
-	
-//  public static val INVALID_NAME = 'invalidName'
-//
-//	@Check
-//	def checkGreetingStartsWithCapital(Greeting greeting) {
-//		if (!Character.isUpperCase(greeting.name.charAt(0))) {
-//			warning('Name should start with a capital', 
-//					MyDslPackage.Literals.GREETING__NAME,
-//					INVALID_NAME)
-//		}
-//	}
+
+	@Check
+	def checkParameterSize(Transition t) {
+		val transSize = t.parameters?.size;
+		val actionSize = t.action.variableListDecl?.variablesDecl?.size;
+
+		if (transSize != actionSize) {
+			error("Wrong number of parameters.", TupiPackage.Literals.TRANSITION__PARAMETERS)
+		}
+	}
+
 }
