@@ -4,8 +4,12 @@
 package br.ufpe.cin.validation
 
 import br.ufpe.cin.jvmmodel.TupiJvmModelInferrer
+import br.ufpe.cin.tupi.ActionsDecl
 import br.ufpe.cin.tupi.Event
+import br.ufpe.cin.tupi.EventsDecl
 import br.ufpe.cin.tupi.MachineDecl
+import br.ufpe.cin.tupi.MemoryDecl
+import br.ufpe.cin.tupi.StateDecl
 import br.ufpe.cin.tupi.Transition
 import br.ufpe.cin.tupi.TupiPackage
 import com.google.inject.Inject
@@ -86,5 +90,68 @@ class TupiValidator extends AbstractTupiValidator {
 			error("Wrong number of parameters.", TupiPackage.Literals.TRANSITION__PARAMETERS)
 		}
 	}
+	
+	@Check
+	def checkDuplicationAction(ActionsDecl decl) {
+		var count = 0;
+		for (action : decl.actions) {
+			for (innerAction : decl.actions) {
+				if (action.name.equals(innerAction.name)) count++;
+			}
+			if (count > 1) error("Duplicated: actions", TupiPackage.Literals.ACTIONS_DECL__ACTIONS)
+			else count = 0;
+		}
+	}
+	
+	@Check
+	def checkDuplicationMemory(MemoryDecl decl) {
+		var count = 0;
+		for (memory : decl.memories) {
+			for (innerMemory : decl.memories) {
+				if (memory.name.equals(innerMemory.name)) count++;
+			}
+			if (count > 1) error("Duplicated: memory", TupiPackage.Literals.MEMORY_DECL__MEMORIES)
+			else count = 0;
+		}
+	}
+	
+	@Check
+	def checkDuplicationEvent(EventsDecl decl) {
+		var count = 0;
+		for (event : decl.events) {
+			for (innerEvent : decl.events) {
+				if (event.name.equals(innerEvent.name)) count++;
+			}
+			if (count > 1) error("Duplicated: memory", TupiPackage.Literals.EVENTS_DECL__EVENTS)
+			else count = 0;
+		}
+	}
+	
+	@Check
+	def checkDuplicationState(StateDecl decl) {
+		var count = 0;
+		for (event : decl.states) {
+			for (innerEvent : decl.states) {
+				if (event.name.equals(innerEvent.name)) count++;
+			}
+			if (count > 1) error("Duplicated: state", TupiPackage.Literals.STATE_DECL__STATES)
+			else count = 0;
+		}
+	}
+	
+	def boolean checkActionDeclOnSuper(MachineDecl machineDecl, String actionName) {
+		if (machineDecl == null) return false;
+		if (machineDecl.superType == null) return false;
+		
+		var machineDeclSup = machineDecl.superType.body.eContainer as MachineDecl;
+		
+		for (action : machineDeclSup.body.actionsDecl.actions)
+			if (actionName.equals(action.name)) return true;
+			
+		checkActionDeclOnSuper(machineDeclSup, actionName);
+		
+		return false; 
+	}
+	
 
 }
