@@ -3,6 +3,7 @@
  */
 package br.ufpe.cin.validation
 
+import br.ufpe.cin.jvmmodel.TupiJvmModelInferrer
 import br.ufpe.cin.tupi.Event
 import br.ufpe.cin.tupi.MachineDecl
 import br.ufpe.cin.tupi.Transition
@@ -12,12 +13,6 @@ import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.validation.Check
 import org.eclipse.xtext.xbase.interpreter.impl.XbaseInterpreter
 import org.eclipse.xtext.xbase.typesystem.computation.ITypeComputer
-import br.ufpe.cin.tupi.MachineBody
-import org.eclipse.xtext.xbase.jvmmodel.IJvmModelInferrer
-import org.eclipse.xtext.xbase.jvmmodel.JvmTypeReferenceBuilder
-import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
-import br.ufpe.cin.jvmmodel.TupiJvmModelInferrer
-import br.ufpe.cin.tupi.VariableDecl
 
 //import org.eclipse.xtext.validation.Check
 /**
