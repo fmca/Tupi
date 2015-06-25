@@ -26,8 +26,8 @@ Event:
 
 Transition:
 	{Transition} "when" "[" originStates+=STATEPATTERNDECL? ("," originStates+=STATEPATTERNDECL)* "]" "->" destState=[State|QualifiedName] "if"
-	guard=[Guard|QualifiedName] "do"
-	action=[Action|QualifiedName] ("(" parameters+=XExpression ("," parameters+=XExpression)* ")")? ("=>" triggers+=TriggerEvent)*;
+	guard=[Guard|QualifiedName] ("do"
+	action=[Action|QualifiedName] ("(" parameters+=XExpression ("," parameters+=XExpression)* ")")?)? (triggers+=TriggerEvent)*;
 
 ActionsDecl:
 	{ActionsDecl} "actions" actions+=Action*;
@@ -38,7 +38,7 @@ Action:
 ;
 
 TriggerEvent:
-	"trigger" event=[Event|QualifiedName] (parameters+=XExpression ("," parameters+=XExpression)*)? ("on" machine=[Memory|QualifiedName])?;
+	"=>" "trigger" event=[Event|QualifiedName] (parameters+=XExpression ("," parameters+=XExpression)*)? "on" (machine=[Memory|QualifiedName]? | "itself");
 
 GuardsDecl:
 	{GuardsDecl} "guards" guards+=Guard ("," guards+=Guard)*;
