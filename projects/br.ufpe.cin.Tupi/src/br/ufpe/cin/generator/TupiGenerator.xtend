@@ -29,8 +29,8 @@ class TupiGenerator implements IGenerator {
 	}
 
 	def createFiles(Model model, IFileSystemAccess fsa) {
-		if(model.machine!=null){
-			
+		if (model.machine != null) {
+
 			fsa.generateFile(new File(model.namespace.name.replace(".", "/"), model.machine.name + ".dot").path,
 				toDotCode(model.machine))
 		}
@@ -62,12 +62,16 @@ class TupiGenerator implements IGenerator {
 
 	def void createClass(MachineBody body) {
 
-		for (state : body?.statesDecl?.states) {
-			if (!machineMapped.states.contains(state.name)) {
-				machineMapped.states.add(state.name);
+		if (body.statesDecl != null) {
+			for (state : body?.statesDecl?.states) {
+				if (!machineMapped.states.contains(state.name)) {
+					machineMapped.states.add(state.name);
+				}
 			}
 		}
-		for (event : body?.eventsDecl?.events) {
+		
+		if(body.eventsDecl != null){
+			for (event : body?.eventsDecl?.events) {
 			for (eventComp : machineMapped.events) {
 				if (eventComp.name.equals(event.name)) {
 					machineMapped.events.remove(eventComp);
@@ -86,6 +90,8 @@ class TupiGenerator implements IGenerator {
 				}
 			}
 		}
+		}
+		
 	}
 
 	def declareBody(MachineBody body) '''

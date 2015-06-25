@@ -69,8 +69,11 @@ class TupiJvmModelInferrer extends AbstractModelInferrer {
 		acceptor.accept(machine.toClass(namespaceStr + "." + className), [
 
 			if (machine.superType != null) {
-				superTypes += typeRef(qualifiedNameProvider.getFullyQualifiedName(machine.superType).toString);
-				
+				try {
+					superTypes += typeRef(qualifiedNameProvider.getFullyQualifiedName(machine.superType).toString);
+				} catch (Exception e) {
+					e.printStackTrace
+				}
 			} else {
 				val statesDecl = machine.body.statesDecl;
 				if (statesDecl != null) {
@@ -173,7 +176,7 @@ class TupiJvmModelInferrer extends AbstractModelInferrer {
 							«FOR transition : transitions»
 								if(_match(«transition.originStates.map[x | '"' + x + '"'].reduce[a,b| a + ', ' + b]»)){
 									if(guard_«transition.guard.name»()){
-										action_«transition.action.name»(«getParameters.apply(transition.parameters)»);
+										«IF transition.action!=null »action_«transition.action.name»(«getParameters.apply(transition.parameters)»); «ENDIF»
 										_currentState="«transition.destState.name»";
 										«IF transition.triggers!=null»
 											«FOR trigger : transition.triggers»
@@ -213,7 +216,7 @@ class TupiJvmModelInferrer extends AbstractModelInferrer {
 							}
 							body = '''
 							«IF machine.superType!=null»
-								super(«if(event.parameters!=null) event.parameters.variablesDecl.join(",")»);
+								super(«if(event.parameters!=null) event.parameters.variablesDecl.map[v | v.name].join(",")»);
 							«ENDIF»
 							«FOR state : machine.body.statesDecl.states»
 								_states.add("«state.name»");
@@ -285,7 +288,6 @@ class TupiJvmModelInferrer extends AbstractModelInferrer {
 		super.infer(use, acceptor, isPreIndexingPhase);
 
 	}
-
 /*
  * 
  * UTILS
