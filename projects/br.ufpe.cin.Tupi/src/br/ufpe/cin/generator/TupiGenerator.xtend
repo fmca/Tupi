@@ -30,7 +30,7 @@ class TupiGenerator implements IGenerator {
 
 	def createFiles(Model model, IFileSystemAccess fsa) {
 		if (model.machine != null) {
-
+			machineMapped=new MachineDeclared()
 			fsa.generateFile(new File(model.namespace.name.replace(".", "/"), model.machine.name + ".dot").path,
 				toDotCode(model.machine))
 		}
@@ -49,18 +49,17 @@ class TupiGenerator implements IGenerator {
 	def declareMachine(MachineDecl machine) '''
 		digraph «machine.name» {
 			rankdir=LR;
-			«mapMachine.put(machine.name, machineMapped=new MachineDeclared())»
+			
 			«IF machine.superType != null»
 				« try{machineMapped.heritage(machine.superType)}catch(Exception e){
-					println(e)
+					e.printStackTrace
 				}»
 			«ENDIF»
-			«machine.body.createClass»
-			«machine.body.declareBody»
+			«createClass(machine.body, machineMapped)»
 		}
 	'''
 
-	def void createClass(MachineBody body) {
+	def createClass(MachineBody body, MachineDeclared machineMapped) {
 
 		if (body.statesDecl != null) {
 			for (state : body?.statesDecl?.states) {
@@ -69,42 +68,46 @@ class TupiGenerator implements IGenerator {
 				}
 			}
 		}
-		
-		if(body.eventsDecl != null){
-			for (event : body?.eventsDecl?.events) {
-			for (eventComp : machineMapped.events) {
-				if (eventComp.name.equals(event.name)) {
-					machineMapped.events.remove(eventComp);
-				}
-			}
-			machineMapped.events.add(eventAux = new Event(event.name));
-			for (trans : event?.transitions) {
-				for (originState : trans?.originStates) {
-					val regex = originState.replace("*", ".*");
-					for (state : machineMapped.states) {
-						if (state.matches(regex)) {
-							eventAux.trans.add(new Transition(state, trans.destState.name, trans.guard.name));
-						}
-					}
 
+		if (body.eventsDecl != null) {
+			for (event : body?.eventsDecl?.events) {
+				for (eventComp : machineMapped.events) {
+					if (eventComp.name.equals(event.name)) {
+						machineMapped.events.remove(eventComp);
+					}
+				}
+				machineMapped.events.add(eventAux = new Event(event.name));
+				for (trans : event?.transitions) {
+					for (originState : trans?.originStates) {
+						val regex = originState.replace("*", ".*");
+						for (state : machineMapped.states) {
+							if (state.matches(regex)) {
+								eventAux.trans.add(new Transition(state, trans.destState.name, trans.guard.name));
+							}
+						}
+
+					}
 				}
 			}
 		}
-		}
-		
+
+		declareBody(machineMapped)
+
 	}
 
-	def declareBody(MachineBody body) '''
-		//states
-		«FOR state : machineMapped.states»
-			«state»;
-		«ENDFOR»
-		//edges
-		«FOR event : machineMapped.events»
-			«FOR tran : event?.trans»
-				«tran.originState»->«tran.destState» [label="«event.name» | «tran.guard»"]; 
+	def declareBody(MachineDeclared machineMapped) {
+		'''
+			//states
+			«FOR state : machineMapped.states»
+				«state»;
 			«ENDFOR»
-		«ENDFOR»
-	'''
+			//edges
+			«FOR event : machineMapped.events»
+				«FOR tran : event?.trans»
+					«tran.originState»->«tran.destState» [label="«event.name» | «tran.guard»"]; 
+				«ENDFOR»
+			«ENDFOR»
+		'''
+	}
 
 }
