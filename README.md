@@ -11,15 +11,12 @@ The main goal is to mimic every EFSM property in **code**:
 - Actions
 
 Plus additional concepts and features such as **polymorphism** and **pattern matching**. <br>
-**You can learn more in our [Wiki](https://github.com/fmca/Tupi/wiki)**
+
+**You can see more code examples in our [Wiki](https://github.com/fmca/Tupi/wiki)**
 
 ###Interpreter
 
 The interpreter is written in Java, so it will run in most platforms, even web pages.<br>Besides its main functionality, you can also enable the generation of ```dot``` files to illustrate any EFSM.
-
-###Input and Output
-User input and console output are natively implemented as EFSMs. (I bet you started noticing that everything will be described using state-machines... everything!)
-
 
 ###Code Example
 
