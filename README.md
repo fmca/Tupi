@@ -58,6 +58,5 @@ machine PrinterLimited extends PrinterCIn
 ```
 
 ### How to install
-
-Tupi is released under an eclipse plugin. You can install it using www.cin.ufpe.br/~fmca/Tupi/ as a update site.
-To learn how to install a plugin you can follow this tutorial.
+Tupi is released under an eclipse plugin. You can install it using www.cin.ufpe.br/~fmca/Tupi/ as update site.  
+To learn how to install a plugin you can follow this [tutorial](http://agile.csc.ncsu.edu/SEMaterials/tutorials/install_plugin/index_v35.html#section1_0).
