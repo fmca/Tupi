@@ -175,7 +175,7 @@ class TupiJvmModelInferrer extends AbstractModelInferrer {
 						'''
 							«FOR transition : transitions»
 								if(_match(«transition.originStates.map[x | '"' + x + '"'].reduce[a,b| a + ', ' + b]»)){
-									if(guard_«transition.guard.name»()){
+									if(«IF transition.guard!=null»guard_«transition.guard.name»()«ELSE»true«ENDIF»){
 										«IF transition.action!=null »action_«transition.action.name»(«getParameters.apply(transition.parameters)»); «ENDIF»
 										_currentState="«transition.destState.name»";
 										«IF transition.triggers!=null»

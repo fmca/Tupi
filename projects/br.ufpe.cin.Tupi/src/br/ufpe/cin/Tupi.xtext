@@ -25,8 +25,8 @@ Event:
 	"{" name=ID "}" (parameters=VariableListDecl)? transitions+=Transition*;
 
 Transition:
-	{Transition} "when" "[" originStates+=STATEPATTERNDECL? ("," originStates+=STATEPATTERNDECL)* "]" "->" destState=[State|QualifiedName] "if"
-	guard=[Guard|QualifiedName] ("do"
+	{Transition} "when" "[" originStates+=STATEPATTERNDECL? ("," originStates+=STATEPATTERNDECL)* "]" "->" destState=[State|QualifiedName] ("if"
+	guard=[Guard|QualifiedName])? ("do"
 	action=[Action|QualifiedName] ("(" parameters+=XExpression ("," parameters+=XExpression)* ")")?)? (triggers+=TriggerEvent)*;
 
 ActionsDecl:

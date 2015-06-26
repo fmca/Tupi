@@ -30,7 +30,7 @@ class TupiGenerator implements IGenerator {
 
 	def createFiles(Model model, IFileSystemAccess fsa) {
 		if (model.machine != null) {
-			machineMapped=new MachineDeclared()
+			machineMapped = new MachineDeclared()
 			fsa.generateFile(new File(model.namespace.name.replace(".", "/"), model.machine.name + ".dot").path,
 				toDotCode(model.machine))
 		}
@@ -82,7 +82,11 @@ class TupiGenerator implements IGenerator {
 						val regex = originState.replace("*", ".*");
 						for (state : machineMapped.states) {
 							if (state.matches(regex)) {
-								eventAux.trans.add(new Transition(state, trans.destState.name, trans.guard.name));
+								var guard = "";
+								if (trans.guard != null) {
+									guard = "| " + trans.guard.name;
+								}
+								eventAux.trans.add(new Transition(state, trans.destState.name, guard));
 							}
 						}
 
@@ -104,7 +108,7 @@ class TupiGenerator implements IGenerator {
 			//edges
 			«FOR event : machineMapped.events»
 				«FOR tran : event?.trans»
-					«tran.originState»->«tran.destState» [label="«event.name» | «tran.guard»"]; 
+					«tran.originState»->«tran.destState» [label="«event.name» «tran.guard»"]; 
 				«ENDFOR»
 			«ENDFOR»
 		'''
