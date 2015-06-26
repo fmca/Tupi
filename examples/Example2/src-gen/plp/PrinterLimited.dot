@@ -1,0 +1,7 @@
+digraph PrinterLimited {
+	rankdir=LR;
+	
+	//states
+	printReady;
+	//edges
+}

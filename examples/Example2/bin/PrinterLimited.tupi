@@ -1,0 +1,11 @@
+namespace plp
+
+machine PrinterLimited extends Printer
+	memory
+		int limit
+	guards
+		canPrint = limit < 10
+	actions
+		print { println ( "Hello from Limited: " + limit ) ; limit = limit + 1 }
+		
+

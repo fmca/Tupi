@@ -1,0 +1,5 @@
+namespace plp
+
+machine PrinterCIn extends Printer
+	actions
+		initialize{message="Hello PLP!"}

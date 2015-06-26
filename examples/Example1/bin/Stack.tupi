@@ -1,0 +1,28 @@
+namespace tupi.example
+
+use java.util.List
+use java.util.ArrayList
+
+machine Stack
+	memory
+		List list
+	states
+		empty,
+		notempty
+	guards
+		hasMore0Elem = list . size > 0
+	actions
+		initList { list = new ArrayList() }
+		push ( Object obj ) { list.add(obj) }
+		pop { list.remove(list.size-1) }
+	events
+		{ START }
+			when [ * ] -> empty do initList
+		{ PUSH } ( Object obj )
+			when [ *empty ] -> notempty do push (obj)
+		{ POP }
+			when [ notempty ] -> notempty if hasMore0Elem do pop
+			when [ notempty ] -> empty do pop
+			
+			
+	

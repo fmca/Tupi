@@ -1,0 +1,20 @@
+namespace plp
+
+machine Printer
+	memory
+		String message
+	states
+		printReady
+	guards
+		canPrint = true
+	actions
+		initialize { message = "Hello World" ; }
+		print {  }
+	events
+		{ START }
+			when [ * ] -> printReady do initialize
+		{ PRINT }
+			when [ print* ] -> printReady if canPrint do print
+				=> trigger PRINT on itself
+			
+			

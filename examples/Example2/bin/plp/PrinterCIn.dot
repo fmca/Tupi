@@ -1,0 +1,7 @@
+digraph PrinterCIn {
+	rankdir=LR;
+	
+	//states
+	printReady;
+	//edges
+}

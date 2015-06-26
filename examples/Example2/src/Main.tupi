@@ -1,0 +1,13 @@
+namespace plp
+
+machine Main
+	memory
+		PrinterLimited print
+	states
+		init
+	events
+		{ START }
+			when [ * ] -> init
+				=> trigger START on print
+				=> trigger PRINT on print
+

@@ -1,0 +1,14 @@
+digraph Stack {
+	rankdir=LR;
+	
+	//states
+	empty;
+	notempty;
+	//edges
+	empty->empty [label="START "]; 
+	notempty->empty [label="START "]; 
+	empty->notempty [label="PUSH "]; 
+	notempty->notempty [label="PUSH "]; 
+	notempty->notempty [label="POP | hasMore0Elem"]; 
+	notempty->empty [label="POP "]; 
+}

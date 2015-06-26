@@ -1,0 +1,9 @@
+digraph Printer {
+	rankdir=LR;
+	
+	//states
+	printReady;
+	//edges
+	printReady->printReady [label="START "]; 
+	printReady->printReady [label="PRINT | canPrint"]; 
+}

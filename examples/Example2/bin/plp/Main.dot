@@ -1,0 +1,8 @@
+digraph Main {
+	rankdir=LR;
+	
+	//states
+	init;
+	//edges
+	init->init [label="START "]; 
+}
