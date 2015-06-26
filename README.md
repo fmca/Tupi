@@ -56,3 +56,8 @@ machine PrinterLimited extends PrinterCIn
 	actions
 		print { println ( "Hello Limited: " + limit ) ; limit = limit + 1 }
 ```
+
+### How to install
+
+Tupi is released under an eclipse plugin. You can install it using www.cin.ufpe.br/~fmca/Tupi/ as a update site.
+To learn how to install a plugin you can follow this tutorial.
