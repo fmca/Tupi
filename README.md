@@ -21,41 +21,12 @@ The interpreter is written in Java, so it will run in most platforms, even web p
 ###Code Example
 
 Every event is described by a ```{EVENT}``` tag followed by one or more *transition pattern matches* ```[states_origin] -> newState```, a transition ```guard``` and an ```action``` to be executed.
-```
-namespace plp
 
-machine Printer
-	memory
-		String message
-	states
-		printReady
-	guards
-		canPrint = true
-	actions
-		initialize { message = "Hello World" ; println ( "first" ) }
-		print { println ( message ) }
-	events
-		{ START }
-			when [ * ] -> printReady if canPrint do initialize
-		{ PRINT }
-			when [ print* ] -> printReady if canPrint do print
-				=> trigger PRINT on itself
-			
-```
+![Printer - "Recursive"](http://i.imgur.com/j1rbnU9.png)
 
 You can also extend an existent machine:
 
-```
-namespace plp
-
-machine PrinterLimited extends PrinterCIn
-	memory
-		int limit
-	guards
-		canPrint = limit < 10
-	actions
-		print { println ( "Hello Limited: " + limit ) ; limit = limit + 1 }
-```
+![Printer Limited](http://i.imgur.com/7rs624y.png)
 
 ### How to install
 Tupi is released under an eclipse plugin. You can install it using www.cin.ufpe.br/~fmca/Tupi/ as update site.  
